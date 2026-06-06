@@ -115,31 +115,53 @@
       text-transform: uppercase;
     }
 
-    .instagram-badge {
+    .social-badges {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .social-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(225, 48, 108, 0.1);
-      border: 1px solid rgba(225, 48, 108, 0.25);
       border-radius: 99px;
       padding: 4px 10px;
-      color: #FF5A8F;
       font-size: 11px;
       font-weight: 600;
       text-decoration: none;
       transition: var(--transition);
       width: fit-content;
-      margin-bottom: 8px;
     }
 
-    .instagram-badge:hover {
+    .social-badge.instagram {
+      background: rgba(225, 48, 108, 0.1);
+      border: 1px solid rgba(225, 48, 108, 0.25);
+      color: #FF5A8F;
+    }
+
+    .social-badge.instagram:hover {
       background: rgba(225, 48, 108, 0.2);
       border-color: rgba(225, 48, 108, 0.4);
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(225, 48, 108, 0.25);
     }
 
-    .instagram-icon {
+    .social-badge.github {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #E8EDF5;
+    }
+
+    .social-badge.github:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+    }
+
+    .social-icon {
       width: 12px;
       height: 12px;
     }
@@ -1091,14 +1113,22 @@
   <div class="app">
     <header class="header">
       <div class="header-brand">
-        <a href="https://instagram.com/faiiruuzzzs" target="_blank" rel="noopener noreferrer" class="instagram-badge">
-          <svg class="instagram-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-          </svg>
-          <span>faiiruuzzzs</span>
-        </a>
+        <div class="social-badges">
+          <a href="https://instagram.com/faiiruuzzzs" target="_blank" rel="noopener noreferrer" class="social-badge instagram">
+            <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+            <span>faiiruuzzzs</span>
+          </a>
+          <a href="https://github.com/FairusPryg" target="_blank" rel="noopener noreferrer" class="social-badge github">
+            <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+            </svg>
+            <span>FairusPryg</span>
+          </a>
+        </div>
         <span class="label">📊 Pencatatan Uang</span>
         <h1>Pengeluaran_FairusPriyogi</h1>
       </div>

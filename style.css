@@ -82,29 +82,47 @@ body {
   font-size: 11px; font-weight: 600; letter-spacing: .15em;
   color: var(--gold); text-transform: uppercase;
 }
-.instagram-badge {
+.social-badges {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.social-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(225, 48, 108, 0.1);
-  border: 1px solid rgba(225, 48, 108, 0.25);
   border-radius: 99px;
   padding: 4px 10px;
-  color: #FF5A8F;
   font-size: 11px;
   font-weight: 600;
   text-decoration: none;
   transition: var(--transition);
   width: fit-content;
-  margin-bottom: 8px;
 }
-.instagram-badge:hover {
+.social-badge.instagram {
+  background: rgba(225, 48, 108, 0.1);
+  border: 1px solid rgba(225, 48, 108, 0.25);
+  color: #FF5A8F;
+}
+.social-badge.instagram:hover {
   background: rgba(225, 48, 108, 0.2);
   border-color: rgba(225, 48, 108, 0.4);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(225, 48, 108, 0.25);
 }
-.instagram-icon {
+.social-badge.github {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #E8EDF5;
+}
+.social-badge.github:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+}
+.social-icon {
   width: 12px;
   height: 12px;
 }
