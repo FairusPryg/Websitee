@@ -160,24 +160,51 @@ function renderChart(list) {
   if (!entries.length) { card.classList.remove('visible'); return; }
   card.classList.add('visible');
 
-  const maxVal = Math.max(...entries.map(e => e[1]));
-  const wrap   = document.getElementById('chartBars');
-  wrap.innerHTML = '';
+  const totalAmt = entries.reduce((sum, [_, amt]) => sum + amt, 0);
+  const container = document.getElementById('chartPieContainer');
+  
+  let currentAngle = 0;
+  const gradientParts = [];
+  let legendHTML = '';
 
   entries.forEach(([catId, amt]) => {
     const cat = CATEGORIES.find(c => c.id === catId) || { label: catId, icon: '📦', color: '#64748B' };
-    const pct = maxVal > 0 ? (amt / maxVal) * 100 : 0;
-    const div = document.createElement('div');
-    div.className = 'chart-bar-wrap';
-    div.innerHTML = `
-      <span class="chart-bar-amt">${fmtRupiahShort(amt)}</span>
-      <div class="chart-bar-outer">
-        <div class="chart-bar" style="height:${pct}%;background:${cat.color};"></div>
+    const pct = totalAmt > 0 ? (amt / totalAmt) * 100 : 0;
+    const nextAngle = currentAngle + pct;
+    gradientParts.push(`${cat.color} ${currentAngle.toFixed(1)}% ${nextAngle.toFixed(1)}%`);
+    currentAngle = nextAngle;
+
+    legendHTML += `
+      <div class="chart-legend-item">
+        <div class="chart-legend-left">
+          <span class="chart-legend-color" style="background: ${cat.color};"></span>
+          <span class="chart-legend-lbl">${cat.icon} ${cat.label}</span>
+        </div>
+        <div class="chart-legend-right">
+          <span class="chart-legend-pct">${pct.toFixed(0)}%</span>
+          <span class="chart-legend-amt">${fmtRupiahShort(amt)}</span>
+        </div>
       </div>
-      <span class="chart-bar-lbl">${cat.icon} ${cat.label}</span>
     `;
-    wrap.appendChild(div);
   });
+
+  const conicGradientValue = gradientParts.length > 0 ? `conic-gradient(${gradientParts.join(', ')})` : 'var(--surface-2)';
+
+  container.innerHTML = `
+    <div class="chart-pie-layout">
+      <div class="chart-pie-wrapper">
+        <div class="chart-pie-donut" style="background: ${conicGradientValue}">
+          <div class="chart-pie-center">
+            <span class="chart-pie-center-val">${fmtRupiahShort(totalAmt)}</span>
+            <span class="chart-pie-center-lbl">Total</span>
+          </div>
+        </div>
+      </div>
+      <div class="chart-legend">
+        ${legendHTML}
+      </div>
+    </div>
+  `;
 }
 
 /* ─── UI: LIST ───────────────────────────────────────────────────────── */
