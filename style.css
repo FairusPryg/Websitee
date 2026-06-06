@@ -469,6 +469,65 @@ body {
 
 /* ─── FORM FIELDS ────────────────────────────────────────────────────── */
 .field { display: flex; flex-direction: column; gap: 7px; }
+.type-toggle {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+.type-btn {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.type-btn[data-type="pengeluaran"].active {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #EF4444;
+  color: #FF6B6B;
+}
+.type-btn[data-type="pemasukan"].active {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10B981;
+  color: #34D399;
+}
+.type-btn:hover:not(.active) {
+  background: var(--surface-3);
+  color: var(--text);
+}
+.chart-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--surface-2);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+}
+.chart-toggle-btn {
+  padding: 4px 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  transition: var(--transition);
+}
+.chart-toggle-btn.active {
+  background: var(--surface-3);
+  color: var(--text);
+}
 .field label { font-size: 12px; font-weight: 600; letter-spacing: .08em; color: var(--text-muted); text-transform: uppercase; }
 .field input, .field select, .field textarea {
   padding: 13px 16px;

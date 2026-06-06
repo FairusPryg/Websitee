@@ -807,6 +807,73 @@
       gap: 7px;
     }
 
+    .type-toggle {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+
+    .type-btn {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .type-btn[data-type="pengeluaran"].active {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #EF4444;
+      color: #FF6B6B;
+    }
+
+    .type-btn[data-type="pemasukan"].active {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: #10B981;
+      color: #34D399;
+    }
+
+    .type-btn:hover:not(.active) {
+      background: var(--surface-3);
+      color: var(--text);
+    }
+
+    .chart-toggle {
+      display: flex;
+      gap: 4px;
+      background: var(--surface-2);
+      padding: 3px;
+      border-radius: var(--radius-sm);
+    }
+
+    .chart-toggle-btn {
+      padding: 4px 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      transition: var(--transition);
+    }
+
+    .chart-toggle-btn.active {
+      background: var(--surface-3);
+      color: var(--text);
+    }
+
     .field label {
       font-size: 12px;
       font-weight: 600;
@@ -1130,22 +1197,22 @@
           </a>
         </div>
         <span class="label">📊 Pencatatan Uang</span>
-        <h1>Pengeluaran_FairusPriyogi</h1>
+        <h1>Pemasukan&Pengeluaran_FairusPriyogi</h1>
       </div>
       <span class="header-date" id="headerDate"></span>
     </header>
 
     <div class="hero-card">
-      <div class="hero-label">Total Pengeluaran</div>
+      <div class="hero-label">Saldo Akhir</div>
       <div class="hero-amount"><span>Rp</span>&nbsp;<span id="heroAmount">0</span></div>
       <div class="hero-sub" id="heroSub">Pilih periode untuk melihat rekap</div>
       <div class="hero-stats">
+        <div class="hero-stat"><span class="hero-stat-val" id="statIncome" style="color: #10B981;">Rp 0</span><span
+            class="hero-stat-lbl">Pemasukan</span></div>
+        <div class="hero-stat"><span class="hero-stat-val" id="statExpense" style="color: #FF6B6B;">Rp 0</span><span
+            class="hero-stat-lbl">Pengeluaran</span></div>
         <div class="hero-stat"><span class="hero-stat-val" id="statCount">0</span><span
             class="hero-stat-lbl">Transaksi</span></div>
-        <div class="hero-stat"><span class="hero-stat-val" id="statAvg">Rp 0</span><span
-            class="hero-stat-lbl">Rata-rata</span></div>
-        <div class="hero-stat"><span class="hero-stat-val" id="statTop">—</span><span
-            class="hero-stat-lbl">Terbesar</span></div>
       </div>
     </div>
 
@@ -1164,7 +1231,13 @@
     </div>
 
     <div class="chart-card" id="chartCard">
-      <div class="chart-header"><span class="chart-title">Pengeluaran per Kategori</span></div>
+      <div class="chart-header">
+        <span class="chart-title">Proporsi Kategori</span>
+        <div class="chart-toggle">
+          <button class="chart-toggle-btn active" data-chart-type="pengeluaran" onclick="setChartType('pengeluaran')">Pengeluaran</button>
+          <button class="chart-toggle-btn" data-chart-type="pemasukan" onclick="setChartType('pemasukan')">Pemasukan</button>
+        </div>
+      </div>
       <div id="chartPieContainer"></div>
     </div>
 
@@ -1180,16 +1253,24 @@
     </div>
   </div>
 
-  <button class="fab" onclick="openModal()" title="Tambah Pengeluaran">+</button>
+  <button class="fab" onclick="openModal()" title="Tambah Pemasukan & Pengeluaran">+</button>
 
   <div class="overlay" id="overlay" onclick="overlayClick(event)">
     <div class="modal" id="modal">
       <div class="modal-handle"></div>
       <div class="modal-header">
-        <span class="modal-title" id="modalTitle">Tambah Pengeluaran</span>
+        <span class="modal-title" id="modalTitle">Tambah Pemasukan & Pengeluaran</span>
         <button class="modal-close" onclick="closeModal()">✕</button>
       </div>
       <div class="modal-body">
+        <div class="field">
+          <label>Tipe Transaksi</label>
+          <div class="type-toggle">
+            <button type="button" class="type-btn active" data-type="pengeluaran" onclick="selectType('pengeluaran')">💸 Pengeluaran</button>
+            <button type="button" class="type-btn" data-type="pemasukan" onclick="selectType('pemasukan')">📈 Pemasukan</button>
+          </div>
+        </div>
+
         <div class="field" id="fieldDate">
           <label>📅 Tanggal</label>
           <input type="date" id="inputDate" />
@@ -1209,7 +1290,7 @@
           <label>📝 Catatan (Opsional)</label>
           <textarea id="inputNote" placeholder="Tulis keterangan singkat…" maxlength="200"></textarea>
         </div>
-        <button class="btn-save" id="btnSave" onclick="saveExpense()">Simpan Pengeluaran</button>
+        <button class="btn-save" id="btnSave" onclick="saveExpense()">Simpan Transaksi</button>
       </div>
     </div>
   </div>
@@ -1217,7 +1298,7 @@
   <div class="confirm-overlay" id="confirmOverlay">
     <div class="confirm-box">
       <div class="confirm-icon">🗑️</div>
-      <div class="confirm-title">Hapus Pengeluaran?</div>
+      <div class="confirm-title">Hapus Transaksi?</div>
       <div class="confirm-msg">Tindakan ini tidak dapat dibatalkan. Data akan dihapus permanen.</div>
       <div class="confirm-actions">
         <button class="confirm-btn confirm-btn-cancel" onclick="closeConfirm()">Batal</button>
@@ -1244,6 +1325,13 @@
       { id: 'lainnya', label: 'Lainnya', icon: '📦', color: '#64748B' },
     ];
 
+    const INCOME_CATEGORIES = [
+      { id: 'gaji', label: 'Gaji', icon: '💼', color: '#10B981' },
+      { id: 'investasi', label: 'Investasi', icon: '📈', color: '#3B82F6' },
+      { id: 'freelance', label: 'Freelance', icon: '💻', color: '#F59E0B' },
+      { id: 'lainnya', label: 'Lainnya', icon: '📦', color: '#64748B' },
+    ];
+
     /* ─── STATE ──────────────────────────────────────────────────────────── */
     let expenses = [];
     let currentMode = 'daily';
@@ -1252,6 +1340,8 @@
     let deleteId = null;
     let selectedCat = '';
     let counterAnimId = null;
+    let selectedType = 'pengeluaran';
+    let currentChartType = 'pengeluaran';
 
     /* ─── STORAGE ────────────────────────────────────────────────────────── */
     function loadData() {
@@ -1264,10 +1354,12 @@
     /* ─── FORMAT ─────────────────────────────────────────────────────────── */
     const fmtRupiah = n => 'Rp ' + Math.round(n).toLocaleString('id-ID');
     const fmtRupiahShort = n => {
-      if (n >= 1_000_000_000) return 'Rp' + (n / 1_000_000_000).toFixed(1) + 'm'
-      if (n >= 1_000_000) return 'Rp ' + (n / 1_000_000).toFixed(1) + 'jt';
-      if (n >= 1_000) return 'Rp ' + (n / 1_000).toFixed(0) + 'rb';
-      return 'Rp ' + n;
+      const sign = n < 0 ? '-' : '';
+      const absN = Math.abs(n);
+      if (absN >= 1_000_000_000) return sign + 'Rp' + (absN / 1_000_000_000).toFixed(1) + 'm';
+      if (absN >= 1_000_000) return sign + 'Rp ' + (absN / 1_000_000).toFixed(1) + 'jt';
+      if (absN >= 1_000) return sign + 'Rp ' + (absN / 1_000).toFixed(0) + 'rb';
+      return sign + 'Rp ' + absN;
     };
 
     /* ─── FILTER LOGIC ───────────────────────────────────────────────────── */
@@ -1324,16 +1416,22 @@
 
     /* ─── HERO ───────────────────────────────────────────────────────────── */
     function renderHero(list, label) {
-      const total = list.reduce((s, e) => s + e.amount, 0);
+      const incomeList = list.filter(e => e.type === 'pemasukan');
+      const expenseList = list.filter(e => !e.type || e.type === 'pengeluaran');
+
+      const totalIncome = incomeList.reduce((s, e) => s + e.amount, 0);
+      const totalExpense = expenseList.reduce((s, e) => s + e.amount, 0);
+      const netBalance = totalIncome - totalExpense;
+
       const count = list.length;
-      animateCounter(document.getElementById('heroAmount'), total);
+      animateCounter(document.getElementById('heroAmount'), netBalance);
       document.getElementById('heroSub').textContent =
-        currentMode === 'daily' ? `Pengeluaran Pada ${label}` :
-          currentMode === 'monthly' ? `Pengeluaran Pada ${label}` :
-            `Pengeluaran Pada ${label}`;
+        currentMode === 'daily' ? `Pemasukan & Pengeluaran Pada ${label}` :
+          currentMode === 'monthly' ? `Pemasukan & Pengeluaran Pada ${label}` :
+            `Pemasukan & Pengeluaran Pada ${label}`;
       document.getElementById('statCount').textContent = count;
-      document.getElementById('statAvg').textContent = count ? fmtRupiahShort(total / count) : 'Rp 0';
-      document.getElementById('statTop').textContent = count ? fmtRupiahShort(Math.max(...list.map(e => e.amount))) : '—';
+      document.getElementById('statIncome').textContent = fmtRupiah(totalIncome);
+      document.getElementById('statExpense').textContent = fmtRupiah(totalExpense);
     }
 
     function animateCounter(el, target) {
@@ -1341,18 +1439,34 @@
       const t0 = performance.now();
       const tick = now => {
         const p = Math.min((now - t0) / 600, 1);
-        el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))).toLocaleString('id-ID');
+        const val = Math.round(target * (1 - Math.pow(1 - p, 3)));
+        const sign = val < 0 ? '-' : '';
+        el.textContent = sign + Math.abs(val).toLocaleString('id-ID');
         if (p < 1) { counterAnimId = requestAnimationFrame(tick); } else { counterAnimId = null; }
       };
       counterAnimId = requestAnimationFrame(tick);
     }
 
     /* ─── CHART ──────────────────────────────────────────────────────────── */
+    function setChartType(type) {
+      currentChartType = type;
+      document.querySelectorAll('.chart-toggle-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.chartType === type);
+      });
+      const filtered = filterExpenses(currentMode, currentFilter);
+      renderChart(filtered);
+    }
+
     function renderChart(list) {
       const card = document.getElementById('chartCard');
-      if (!list.length) { card.classList.remove('visible'); return; }
+      const targetList = list.filter(e => {
+        const t = e.type || 'pengeluaran';
+        return t === currentChartType;
+      });
+
+      if (!targetList.length) { card.classList.remove('visible'); return; }
       const totals = {};
-      list.forEach(e => { totals[e.category] = (totals[e.category] || 0) + e.amount; });
+      targetList.forEach(e => { totals[e.category] = (totals[e.category] || 0) + e.amount; });
       const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]).slice(0, 8);
       if (!entries.length) { card.classList.remove('visible'); return; }
       card.classList.add('visible');
@@ -1364,8 +1478,10 @@
       const gradientParts = [];
       let legendHTML = '';
 
+      const activeCategories = currentChartType === 'pemasukan' ? INCOME_CATEGORIES : CATEGORIES;
+
       entries.forEach(([catId, amt]) => {
-        const cat = CATEGORIES.find(c => c.id === catId) || { label: catId, icon: '📦', color: '#64748B' };
+        const cat = activeCategories.find(c => c.id === catId) || { label: catId, icon: '📦', color: '#64748B' };
         const pct = totalAmt > 0 ? (amt / totalAmt) * 100 : 0;
         const nextAngle = currentAngle + pct;
         gradientParts.push(`${cat.color} ${currentAngle.toFixed(1)}% ${nextAngle.toFixed(1)}%`);
@@ -1414,7 +1530,13 @@
       const sorted = [...list].sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
       ul.innerHTML = '';
       sorted.forEach((e, i) => {
-        const cat = CATEGORIES.find(c => c.id === e.category) || { label: e.category, icon: '📦', color: '#64748B' };
+        const isIncome = e.type === 'pemasukan';
+        const activeCategories = isIncome ? INCOME_CATEGORIES : CATEGORIES;
+        const cat = activeCategories.find(c => c.id === e.category) || { label: e.category, icon: '📦', color: '#64748B' };
+        
+        const sign = isIncome ? '+' : '-';
+        const color = isIncome ? '#10B981' : '#FF6B6B';
+
         const div = document.createElement('div');
         div.className = 'tx-item';
         div.style.animationDelay = `${i * 40}ms`;
@@ -1426,7 +1548,7 @@
         <div class="tx-date">${e.date}</div>
       </div>
       <div class="tx-right">
-        <div class="tx-amount">${fmtRupiah(e.amount)}</div>
+        <div class="tx-amount" style="color: ${color};">${sign} ${fmtRupiah(e.amount)}</div>
         <div class="tx-actions">
           <button class="tx-btn tx-btn-edit" onclick="openEdit('${e.id}',event)" title="Edit">✏️</button>
           <button class="tx-btn tx-btn-del"  onclick="openDelete('${e.id}',event)" title="Hapus">🗑️</button>
@@ -1437,10 +1559,20 @@
     }
 
     /* ─── MODAL ──────────────────────────────────────────────────────────── */
+    function selectType(type) {
+      selectedType = type;
+      document.querySelectorAll('.type-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === type);
+      });
+      selectedCat = '';
+      buildCatGrid();
+    }
+
     function buildCatGrid() {
       const grid = document.getElementById('catGrid');
       grid.innerHTML = '';
-      CATEGORIES.forEach(c => {
+      const activeCategories = selectedType === 'pemasukan' ? INCOME_CATEGORIES : CATEGORIES;
+      activeCategories.forEach(c => {
         const btn = document.createElement('button');
         btn.className = 'cat-btn'; btn.dataset.id = c.id;
         btn.innerHTML = `<span class="cat-icon">${c.icon}</span><span class="cat-name">${c.label}</span>`;
@@ -1457,12 +1589,13 @@
 
     function openModal() {
       editId = null; selectedCat = '';
-      document.getElementById('modalTitle').textContent = 'Tambah Pengeluaran';
-      document.getElementById('btnSave').textContent = 'Simpan Pengeluaran';
+      document.getElementById('modalTitle').textContent = 'Tambah Pemasukan & Pengeluaran';
+      document.getElementById('btnSave').textContent = 'Simpan Transaksi';
       document.getElementById('inputDate').value = todayISO();
       document.getElementById('inputAmount').value = '';
       document.getElementById('inputNote').value = '';
-      clearErrors(); buildCatGrid();
+      clearErrors(); 
+      selectType('pengeluaran');
       document.getElementById('overlay').classList.add('open');
       document.body.style.overflow = 'hidden';
     }
@@ -1472,12 +1605,14 @@
       const exp = expenses.find(x => x.id === id);
       if (!exp) return;
       editId = id; selectedCat = exp.category;
-      document.getElementById('modalTitle').textContent = 'Edit Pengeluaran';
+      document.getElementById('modalTitle').textContent = 'Edit Transaksi';
       document.getElementById('btnSave').textContent = 'Simpan Perubahan';
       document.getElementById('inputDate').value = exp.date;
       document.getElementById('inputAmount').value = formatNumberWithDots(exp.amount.toString());
       document.getElementById('inputNote').value = exp.note || '';
-      clearErrors(); buildCatGrid(); selectCat(exp.category);
+      clearErrors(); 
+      selectType(exp.type || 'pengeluaran');
+      selectCat(exp.category);
       document.getElementById('overlay').classList.add('open');
       document.body.style.overflow = 'hidden';
     }
@@ -1507,12 +1642,12 @@
       if (editId) {
         const idx = expenses.findIndex(e => e.id === editId);
         if (idx > -1) {
-          expenses[idx] = { ...expenses[idx], date, amount, category: selectedCat, note, updatedAt: Date.now() };
-          showToast('Pengeluaran diperbarui ✓', 'success');
+          expenses[idx] = { ...expenses[idx], date, amount, type: selectedType, category: selectedCat, note, updatedAt: Date.now() };
+          showToast('Transaksi diperbarui ✓', 'success');
         }
       } else {
-        expenses.unshift({ id: genId(), date, amount, category: selectedCat, note, createdAt: Date.now() });
-        showToast('Pengeluaran disimpan ✓', 'success');
+        expenses.unshift({ id: genId(), date, amount, type: selectedType, category: selectedCat, note, createdAt: Date.now() });
+        showToast('Transaksi disimpan ✓', 'success');
       }
       saveData(); closeModal();
       if (currentFilter) applyFilter();
@@ -1531,7 +1666,7 @@
     function confirmDelete() {
       expenses = expenses.filter(e => e.id !== deleteId);
       saveData(); closeConfirm();
-      showToast('Pengeluaran dihapus', 'success');
+      showToast('Transaksi dihapus', 'success');
       if (currentFilter) applyFilter();
     }
 
