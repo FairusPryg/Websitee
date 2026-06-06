@@ -1224,6 +1224,7 @@
     <div class="filter-card">
       <div class="filter-tabs">
         <button class="tab-btn active" data-mode="daily" onclick="setMode('daily')">Harian</button>
+        <button class="tab-btn" data-mode="weekly" onclick="setMode('weekly')">Mingguan</button>
         <button class="tab-btn" data-mode="monthly" onclick="setMode('monthly')">Bulanan</button>
         <button class="tab-btn" data-mode="yearly" onclick="setMode('yearly')">Tahunan</button>
       </div>
@@ -1378,6 +1379,10 @@
         if (mode === 'daily') return e.date === value;
         if (mode === 'monthly') return e.date.startsWith(value + '-');
         if (mode === 'yearly') return e.date.startsWith(value + '-');
+        if (mode === 'weekly') {
+          const [startStr, endStr] = value.split('/');
+          return e.date >= startStr && e.date <= endStr;
+        }
         return false;
       });
     }
@@ -1389,6 +1394,20 @@
     }
 
     /* ─── MODE TABS ──────────────────────────────────────────────────────── */
+    function getWeekRange(date) {
+      const pad = n => String(n).padStart(2, '0');
+      const d = new Date(date);
+      // Get Monday of the week (day 0=Sun, shift so Mon=0)
+      const day = d.getDay(); // 0=Sun..6=Sat
+      const diffToMon = (day === 0) ? -6 : 1 - day;
+      const mon = new Date(d);
+      mon.setDate(d.getDate() + diffToMon);
+      const sun = new Date(mon);
+      sun.setDate(mon.getDate() + 6);
+      const fmt = dt => `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+      return { start: fmt(mon), end: fmt(sun), label: `${fmt(mon)} s/d ${fmt(sun)}` };
+    }
+
     function setMode(mode) {
       currentMode = mode;
       document.querySelectorAll('.tab-btn').forEach(b =>
@@ -1401,9 +1420,10 @@
       const mm = pad(today.getMonth() + 1);
       const dd = pad(today.getDate());
 
-      if (mode === 'daily') { input.placeholder = 'YYYY-MM-DD'; input.value = `${yyyy}-${mm}-${dd}`; input.maxLength = 10; }
+      if (mode === 'daily')   { input.placeholder = 'YYYY-MM-DD'; input.value = `${yyyy}-${mm}-${dd}`; input.maxLength = 10; }
+      if (mode === 'weekly')  { const wr = getWeekRange(today); input.placeholder = 'YYYY-MM-DD'; input.value = `${yyyy}-${mm}-${dd}`; input.maxLength = 10; }
       if (mode === 'monthly') { input.placeholder = 'YYYY-MM'; input.value = `${yyyy}-${mm}`; input.maxLength = 7; }
-      if (mode === 'yearly') { input.placeholder = 'YYYY'; input.value = `${yyyy}`; input.maxLength = 4; }
+      if (mode === 'yearly')  { input.placeholder = 'YYYY'; input.value = `${yyyy}`; input.maxLength = 4; }
 
       applyFilter();
     }
@@ -1411,14 +1431,21 @@
     /* ─── APPLY FILTER ───────────────────────────────────────────────────── */
     function applyFilter() {
       const raw = document.getElementById('filterInput').value.trim();
-      const patterns = { daily: /^\d{4}-\d{2}-\d{2}$/, monthly: /^\d{4}-\d{2}$/, yearly: /^\d{4}$/ };
+      const patterns = { daily: /^\d{4}-\d{2}-\d{2}$/, weekly: /^\d{4}-\d{2}-\d{2}$/, monthly: /^\d{4}-\d{2}$/, yearly: /^\d{4}$/ };
       if (!patterns[currentMode].test(raw)) {
-        showToast({ daily: 'Format: YYYY-MM-DD', monthly: 'Format: YYYY-MM', yearly: 'Format: YYYY' }[currentMode], 'error');
+        showToast({ daily: 'Format: YYYY-MM-DD', weekly: 'Format: YYYY-MM-DD', monthly: 'Format: YYYY-MM', yearly: 'Format: YYYY' }[currentMode], 'error');
         return;
       }
-      currentFilter = raw;
-      const filtered = filterExpenses(currentMode, raw);
-      renderHero(filtered, raw);
+      let filterValue = raw;
+      let displayLabel = raw;
+      if (currentMode === 'weekly') {
+        const wr = getWeekRange(new Date(raw));
+        filterValue = `${wr.start}/${wr.end}`;
+        displayLabel = wr.label;
+      }
+      currentFilter = filterValue;
+      const filtered = filterExpenses(currentMode, filterValue);
+      renderHero(filtered, displayLabel);
       renderList(filtered);
       renderChart(filtered);
     }
@@ -1435,9 +1462,8 @@
       const count = list.length;
       animateCounter(document.getElementById('heroAmount'), netBalance);
       document.getElementById('heroSub').textContent =
-        currentMode === 'daily' ? `Pemasukan & Pengeluaran Pada ${label}` :
-          currentMode === 'monthly' ? `Pemasukan & Pengeluaran Pada ${label}` :
-            `Pemasukan & Pengeluaran Pada ${label}`;
+        currentMode === 'weekly' ? `Rekap Mingguan: ${label}` :
+          `Pemasukan & Pengeluaran Pada ${label}`;
       document.getElementById('statCount').textContent = count;
       document.getElementById('statIncome').textContent = fmtRupiah(totalIncome);
       document.getElementById('statExpense').textContent = fmtRupiah(totalExpense);
