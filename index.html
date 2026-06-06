@@ -1420,10 +1420,10 @@
       const mm = pad(today.getMonth() + 1);
       const dd = pad(today.getDate());
 
-      if (mode === 'daily')   { input.placeholder = 'YYYY-MM-DD'; input.value = `${yyyy}-${mm}-${dd}`; input.maxLength = 10; }
-      if (mode === 'weekly')  { const wr = getWeekRange(today); input.placeholder = 'YYYY-MM-DD'; input.value = `${yyyy}-${mm}-${dd}`; input.maxLength = 10; }
+      if (mode === 'daily') { input.placeholder = 'YYYY-MM-DD'; input.value = `${yyyy}-${mm}-${dd}`; input.maxLength = 10; }
+      if (mode === 'weekly') { const wr = getWeekRange(today); input.placeholder = 'YYYY-MM-DD'; input.value = `${yyyy}-${mm}-${dd}`; input.maxLength = 10; }
       if (mode === 'monthly') { input.placeholder = 'YYYY-MM'; input.value = `${yyyy}-${mm}`; input.maxLength = 7; }
-      if (mode === 'yearly')  { input.placeholder = 'YYYY'; input.value = `${yyyy}`; input.maxLength = 4; }
+      if (mode === 'yearly') { input.placeholder = 'YYYY'; input.value = `${yyyy}`; input.maxLength = 4; }
 
       applyFilter();
     }
