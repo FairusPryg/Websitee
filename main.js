@@ -1,702 +1,386 @@
-/* =============================================
-   PORTFOLIO JS — FAIRUSPRIYOGI
-   Smooth animations, interactions & effects
-   ============================================= */
-
 'use strict';
 
-// ---- DOM READY ----
-document.addEventListener('DOMContentLoaded', () => {
-  initPreloader();
-  initCursor();
-  initNavbar();
-  initMobileMenu();
-  initTypingEffect();
-  initParticles();
-  initScrollAnimations();
-  initSkillBars();
-  initContactForm();
-  initBackToTop();
-  initFooterYear();
-  initSmoothScroll();
-  initHeroParallax();
-});
+/* ─── CONSTANTS ─────────────────────────────────────────────────────── */
+const STORAGE_KEY = 'expense_tracker_v1';
 
-/* ==========================================
-   1. PRELOADER
-   ========================================== */
-function initPreloader() {
-  const preloader = document.getElementById('preloader');
-  if (!preloader) return;
+// Perubahan warna kategori Belanja menjadi Oranye Jingga (#ff7607)
+const CATEGORIES = [
+  { id:'makanan',    label:'Makanan',    icon:'🍜', color:'#FF6B35' },
+  { id:'transport',  label:'Transport',  icon:'🚌', color:'#3B82F6' },
+  { id:'belanja',    label:'Belanja',    icon:'🛒', color:'#ff7607' }, 
+  { id:'tagihan',    label:'Tagihan',    icon:'🧾', color:'#f2f1f1' },
+  { id:'hiburan',    label:'Hiburan',    icon:'🎮', color:'#10B981' },
+  { id:'kesehatan',  label:'Kesehatan',  icon:'💊', color:'#06B6D4' },
+  { id:'pendidikan', label:'Pendidikan', icon:'📚', color:'#F59E0B' },
+  { id:'lainnya',    label:'Lainnya',    icon:'📦', color:'#64748B' },
+];
 
-  // Minimum display time for UX
-  setTimeout(() => {
-    preloader.classList.add('hidden');
-    // Re-enable body scroll after preloader
-    document.body.style.overflow = '';
-    // Trigger hero animations
-    document.querySelectorAll('.hero-content > *').forEach((el, i) => {
-      el.style.animationDelay = `${i * 0.1}s`;
-    });
-  }, 2000);
+/* ─── STATE ──────────────────────────────────────────────────────────── */
+let expenses        = [];
+let currentMode     = 'daily';
+let currentFilter   = '';
+let editId          = null;
+let deleteId        = null;
+let selectedCat     = '';
+let counterAnimId   = null; // FIX #4: track animasi counter agar bisa dibatalkan
 
+/* ─── STORAGE ────────────────────────────────────────────────────────── */
+function loadData() {
+  try { expenses = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { expenses = []; }
+}
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+}
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+/* ─── FORMAT ─────────────────────────────────────────────────────────── */
+const fmtRupiah = n =>
+  'Rp ' + Math.round(n).toLocaleString('id-ID');
+
+const fmtRupiahShort = n => {
+  if (n >= 1_000_000) return 'Rp ' + (n / 1_000_000).toFixed(1) + 'jt';
+  if (n >= 1_000)     return 'Rp ' + (n / 1_000).toFixed(0) + 'rb';
+  return 'Rp ' + n;
+};
+
+/* ─── FILTER LOGIC ───────────────────────────────────────────────────── */
+function filterExpenses(mode, value) {
+  if (!value) return [];
+  return expenses.filter(e => {
+    if (mode === 'daily')   return e.date === value;
+    if (mode === 'monthly') return e.date.startsWith(value + '-');
+    // FIX #2: cukup startsWith(value + '-') saja, tidak perlu kondisi kedua
+    if (mode === 'yearly')  return e.date.startsWith(value + '-');
+    return false;
+  });
+}
+
+/* ─── UI: HEADER DATE ────────────────────────────────────────────────── */
+function renderHeaderDate() {
+  const now  = new Date();
+  const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+  document.getElementById('headerDate').textContent =
+    now.toLocaleDateString('id-ID', opts);
+}
+
+/* ─── UI: MODE TABS ──────────────────────────────────────────────────── */
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+
+  const input = document.getElementById('filterInput');
+  const today = new Date();
+  const pad   = n => String(n).padStart(2, '0');
+  const yyyy  = today.getFullYear();
+  const mm    = pad(today.getMonth() + 1);
+  const dd    = pad(today.getDate());
+
+  if (mode === 'daily')   { input.placeholder = 'DD-MM-YYY'; input.value = `${dd}-${mm}-${yyyy}`; input.maxLength = 10; }
+  if (mode === 'monthly') { input.placeholder = 'MM-YYY';    input.value = `${mm}-${yyyy}`;       input.maxLength = 7;  }
+  if (mode === 'yearly')  { input.placeholder = 'YYYY';       input.value = `${yyyy}`;             input.maxLength = 4;  }
+
+  applyFilter();
+}
+
+/* ─── UI: APPLY FILTER ───────────────────────────────────────────────── */
+function applyFilter() {
+  const raw = document.getElementById('filterInput').value.trim();
+
+  const patterns = {
+    daily:   /^\d{4}-\d{2}-\d{2}$/,
+    monthly: /^\d{4}-\d{2}$/,
+    yearly:  /^\d{4}$/,
+  };
+
+  if (!patterns[currentMode].test(raw)) {
+    const hints = {
+      daily:   'Format: YYYY-MM-DD',
+      monthly: 'Format: YYYY-MM',
+      yearly:  'Format: YYYY',
+    };
+    showToast(hints[currentMode], 'error');
+    return;
+  }
+
+  currentFilter = raw;
+  const filtered = filterExpenses(currentMode, raw);
+  renderHero(filtered, raw);
+  renderList(filtered);
+  renderChart(filtered);
+}
+
+/* ─── UI: HERO ───────────────────────────────────────────────────────── */
+function renderHero(list, label) {
+  const total = list.reduce((s, e) => s + e.amount, 0);
+  const count = list.length;
+  const avg   = count ? total / count : 0;
+  const max   = count ? Math.max(...list.map(e => e.amount)) : 0;
+
+  animateCounter(document.getElementById('heroAmount'), total);
+
+  document.getElementById('heroSub').textContent =
+    currentMode === 'daily'   ? `Pengeluaran tanggal ${label}` :
+    currentMode === 'monthly' ? `Pengeluaran bulan ${label}`   :
+                                `Pengeluaran tahun ${label}`;
+
+  document.getElementById('statCount').textContent = count;
+  document.getElementById('statAvg').textContent   = fmtRupiahShort(avg);
+  document.getElementById('statTop').textContent   = count ? fmtRupiahShort(max) : '—';
+}
+
+// FIX #4: cancel animasi sebelumnya sebelum mulai yang baru
+function animateCounter(el, target) {
+  if (counterAnimId) cancelAnimationFrame(counterAnimId);
+  const dur = 600;
+  const t0  = performance.now();
+  const tick = now => {
+    const p    = Math.min((now - t0) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(target * ease).toLocaleString('id-ID');
+    if (p < 1) { counterAnimId = requestAnimationFrame(tick); }
+    else        { counterAnimId = null; }
+  };
+  counterAnimId = requestAnimationFrame(tick);
+}
+
+/* ─── UI: CHART ──────────────────────────────────────────────────────── */
+function renderChart(list) {
+  const card = document.getElementById('chartCard');
+  if (!list.length) { card.classList.remove('visible'); return; }
+
+  const totals = {};
+  list.forEach(e => { totals[e.category] = (totals[e.category] || 0) + e.amount; });
+  const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+  if (!entries.length) { card.classList.remove('visible'); return; }
+  card.classList.add('visible');
+
+  const maxVal = Math.max(...entries.map(e => e[1]));
+  const wrap   = document.getElementById('chartBars');
+  wrap.innerHTML = '';
+
+  entries.forEach(([catId, amt]) => {
+    const cat = CATEGORIES.find(c => c.id === catId) || { label: catId, icon: '📦', color: '#64748B' };
+    const pct = maxVal > 0 ? (amt / maxVal) * 100 : 0;
+    const div = document.createElement('div');
+    div.className = 'chart-bar-wrap';
+    div.innerHTML = `
+      <span class="chart-bar-amt">${fmtRupiahShort(amt)}</span>
+      <div class="chart-bar-outer">
+        <div class="chart-bar" style="height:${pct}%;background:${cat.color};"></div>
+      </div>
+      <span class="chart-bar-lbl">${cat.icon} ${cat.label}</span>
+    `;
+    wrap.appendChild(div);
+  });
+}
+
+/* ─── UI: LIST ───────────────────────────────────────────────────────── */
+function renderList(list) {
+  const ul    = document.getElementById('txList');
+  const empty = document.getElementById('emptyState');
+  const count = document.getElementById('sectionCount');
+
+  count.textContent = `${list.length} item`;
+
+  if (!list.length) {
+    ul.innerHTML = '';
+    empty.classList.add('visible');
+    return;
+  }
+  empty.classList.remove('visible');
+
+  const sorted = [...list].sort((a, b) =>
+    b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
+  ul.innerHTML = '';
+
+  sorted.forEach((e, i) => {
+    const cat = CATEGORIES.find(c => c.id === e.category) ||
+                { label: e.category, icon: '📦', color: '#64748B' };
+    const div = document.createElement('div');
+    div.className = 'tx-item';
+    div.style.animationDelay = `${i * 40}ms`;
+    div.innerHTML = `
+      <div class="tx-badge" style="background:${cat.color}22;">
+        <span>${cat.icon}</span>
+      </div>
+      <div class="tx-info">
+        <div class="tx-category" style="color:${cat.color}">${cat.label}</div>
+        <div class="tx-note">${escHtml(e.note || 'Tidak ada catatan')}</div>
+        <div class="tx-date">${e.date}</div>
+      </div>
+      <div class="tx-right">
+        <div class="tx-amount">${fmtRupiah(e.amount)}</div>
+        <div class="tx-actions">
+          <button class="tx-btn tx-btn-edit" onclick="openEdit('${e.id}',event)" title="Edit">✏️</button>
+          <button class="tx-btn tx-btn-del"  onclick="openDelete('${e.id}',event)" title="Hapus">🗑️</button>
+        </div>
+      </div>
+    `;
+    ul.appendChild(div);
+  });
+}
+
+/* ─── MODAL ──────────────────────────────────────────────────────────── */
+function buildCatGrid() {
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = '';
+  CATEGORIES.forEach(c => {
+    const btn      = document.createElement('button');
+    btn.className  = 'cat-btn';
+    btn.dataset.id = c.id;
+    btn.innerHTML  = `<span class="cat-icon">${c.icon}</span><span class="cat-name">${c.label}</span>`;
+    btn.onclick    = () => selectCat(c.id);
+    grid.appendChild(btn);
+  });
+}
+
+function selectCat(id) {
+  selectedCat = id;
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.id === id);
+  });
+  document.getElementById('fieldCategory').classList.remove('has-error');
+}
+
+function openModal() {
+  editId = null; selectedCat = '';
+  document.getElementById('modalTitle').textContent = 'Tambah Pengeluaran';
+  document.getElementById('btnSave').textContent    = 'Simpan Pengeluaran';
+  document.getElementById('inputDate').value        = todayISO();
+  document.getElementById('inputAmount').value      = '';
+  document.getElementById('inputNote').value        = '';
+  clearErrors();
+  buildCatGrid();
+  document.getElementById('overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
-/* ==========================================
-   2. CUSTOM CURSOR
-   ========================================== */
-function initCursor() {
-  const cursor = document.getElementById('cursor');
-  const follower = document.getElementById('cursorFollower');
-  if (!cursor || !follower) return;
+function openEdit(id, e) {
+  e.stopPropagation();
+  const exp = expenses.find(x => x.id === id);
+  if (!exp) return;
 
-  let mouseX = 0, mouseY = 0;
-  let followerX = 0, followerY = 0;
-
-  document.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    cursor.style.left = mouseX + 'px';
-    cursor.style.top  = mouseY + 'px';
-  });
-
-  // Smooth follower animation using rAF
-  function animateFollower() {
-    followerX += (mouseX - followerX) * 0.12;
-    followerY += (mouseY - followerY) * 0.12;
-    follower.style.left = followerX + 'px';
-    follower.style.top  = followerY + 'px';
-    requestAnimationFrame(animateFollower);
-  }
-  animateFollower();
-
-  // Scale on hover interactive elements
-  const interactables = document.querySelectorAll('a, button, input, textarea, .hobby-card, .skill-icon-item, .edu-card, .timeline-card');
-  interactables.forEach(el => {
-    el.addEventListener('mouseenter', () => {
-      cursor.style.transform = 'translate(-50%, -50%) scale(0.4)';
-      follower.style.width  = '56px';
-      follower.style.height = '56px';
-      follower.style.borderColor = 'rgba(168,85,247,0.6)';
-    });
-    el.addEventListener('mouseleave', () => {
-      cursor.style.transform = 'translate(-50%, -50%) scale(1)';
-      follower.style.width  = '36px';
-      follower.style.height = '36px';
-      follower.style.borderColor = 'rgba(168,85,247,0.2)';
-    });
-  });
-
-  // Hide on leave
-  document.addEventListener('mouseleave', () => {
-    cursor.style.opacity = '0';
-    follower.style.opacity = '0';
-  });
-  document.addEventListener('mouseenter', () => {
-    cursor.style.opacity = '1';
-    follower.style.opacity = '1';
-  });
+  editId = id; selectedCat = exp.category;
+  document.getElementById('modalTitle').textContent = 'Edit Pengeluaran';
+  document.getElementById('btnSave').textContent    = 'Simpan Perubahan';
+  document.getElementById('inputDate').value        = exp.date;
+  document.getElementById('inputAmount').value      = exp.amount;
+  document.getElementById('inputNote').value        = exp.note || '';
+  clearErrors();
+  buildCatGrid();
+  selectCat(exp.category);
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
-/* ==========================================
-   3. NAVBAR — scroll & active link
-   ========================================== */
-function initNavbar() {
-  const navbar = document.getElementById('navbar');
-  if (!navbar) return;
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
 
-  const sections = document.querySelectorAll('section[id]');
-  const navLinks = document.querySelectorAll('.nav-link');
+function overlayClick(e) {
+  if (e.target === document.getElementById('overlay')) closeModal();
+}
 
-  function updateNavbar() {
-    const scrollY = window.scrollY;
+/* ─── SAVE ───────────────────────────────────────────────────────────── */
+function saveExpense() {
+  const date   = document.getElementById('inputDate').value;
+  const amount = parseFloat(document.getElementById('inputAmount').value);
+  const note   = document.getElementById('inputNote').value.trim();
+  let valid    = true;
 
-    // Sticky effect
-    if (scrollY > 60) {
-      navbar.classList.add('scrolled');
-    } else {
-      navbar.classList.remove('scrolled');
+  clearErrors();
+  if (!date)              { document.getElementById('fieldDate').classList.add('has-error');     valid = false; }
+  if (!amount || amount <= 0) { document.getElementById('fieldAmount').classList.add('has-error'); valid = false; }
+  if (!selectedCat)       { document.getElementById('fieldCategory').classList.add('has-error'); valid = false; }
+  if (!valid) return;
+
+  if (editId) {
+    const idx = expenses.findIndex(e => e.id === editId);
+    if (idx > -1) {
+      // FIX #5: pastikan createdAt tidak hilang saat edit
+      expenses[idx] = {
+        ...expenses[idx],
+        date,
+        amount,
+        category: selectedCat,
+        note,
+        updatedAt: Date.now(),
+      };
+      showToast('Pengeluaran diperbarui ✓', 'success');
     }
-
-    // Active link highlighting
-    let current = '';
-    sections.forEach(section => {
-      const sectionTop = section.offsetTop - 120;
-      const sectionHeight = section.offsetHeight;
-      if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
-        current = section.getAttribute('id');
-      }
+  } else {
+    expenses.unshift({
+      id: genId(), date, amount,
+      category: selectedCat, note,
+      createdAt: Date.now(),
     });
-
-    navLinks.forEach(link => {
-      link.classList.remove('active');
-      if (link.dataset.section === current) {
-        link.classList.add('active');
-      }
-    });
+    showToast('Pengeluaran disimpan ✓', 'success');
   }
 
-  window.addEventListener('scroll', updateNavbar, { passive: true });
-  updateNavbar();
+  saveData();
+  closeModal();
+  if (currentFilter) applyFilter();
 }
 
-/* ==========================================
-   4. MOBILE HAMBURGER MENU
-   ========================================== */
-function initMobileMenu() {
-  const hamburger = document.getElementById('hamburger');
-  const navLinks  = document.getElementById('navLinks');
-  if (!hamburger || !navLinks) return;
+/* ─── DELETE ─────────────────────────────────────────────────────────── */
+function openDelete(id, e) {
+  e.stopPropagation();
+  deleteId = id;
+  document.getElementById('confirmOverlay').classList.add('open');
+}
 
+function closeConfirm() {
+  deleteId = null;
+  document.getElementById('confirmOverlay').classList.remove('open');
+}
 
+function confirmDelete() {
+  expenses = expenses.filter(e => e.id !== deleteId);
+  saveData();
+  closeConfirm();
+  showToast('Pengeluaran dihapus', 'success');
+  if (currentFilter) applyFilter();
+}
 
-  function openMenu() {
-    hamburger.classList.add('open');
-    navLinks.classList.add('open');
-    document.body.style.overflow = 'hidden';
+/* ─── HELPERS ────────────────────────────────────────────────────────── */
+function clearErrors() {
+  ['fieldDate', 'fieldAmount', 'fieldCategory'].forEach(id =>
+    document.getElementById(id).classList.remove('has-error'));
+}
+
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function escHtml(s) {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function showToast(msg, type = 'success') {
+  const wrap = document.getElementById('toastWrap');
+  const t    = document.createElement('div');
+  t.className   = `toast toast-${type}`;
+  t.textContent = msg;
+  wrap.appendChild(t);
+  setTimeout(() => t.remove(), 2700);
+}
+
+/* ─── KEYBOARD ───────────────────────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeConfirm(); }
+  if (e.key === 'Enter' && document.activeElement === document.getElementById('filterInput')) {
+    applyFilter();
   }
-
-  function closeMenu() {
-    hamburger.classList.remove('open');
-    navLinks.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  hamburger.addEventListener('click', () => {
-    if (navLinks.classList.contains('open')) {
-      closeMenu();
-    } else {
-      openMenu();
-    }
-  });
-
-  closeBtn.addEventListener('click', closeMenu);
-
-  // Close on nav link click
-  navLinks.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', closeMenu);
-  });
-
-  // Close on outside click
-  document.addEventListener('click', (e) => {
-    if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
-      closeMenu();
-    }
-  });
-}
-
-/* ==========================================
-   5. TYPING / ROLE ROTATION EFFECT
-   ========================================== */
-function initTypingEffect() {
-  const roleEl = document.getElementById('roleText');
-  if (!roleEl) return;
-
-  const roles = [
-    'Full-Stack Developer',
-    'System Architect',
-    'AI & Prompt Engineer',
-    'Database & API Integrator',
-    'Full-Lifecycle Developer',
-  ];
-
-  let roleIndex = 0;
-  let charIndex = 0;
-  let isDeleting = false;
-  let isPaused = false;
-
-  function typeLoop() {
-    const current = roles[roleIndex];
-
-    if (!isDeleting) {
-      roleEl.textContent = current.substring(0, charIndex + 1);
-      charIndex++;
-
-      if (charIndex === current.length) {
-        isPaused = true;
-        setTimeout(() => {
-          isPaused = false;
-          isDeleting = true;
-          typeLoop();
-        }, 2200);
-        return;
-      }
-    } else {
-      roleEl.textContent = current.substring(0, charIndex - 1);
-      charIndex--;
-
-      if (charIndex === 0) {
-        isDeleting = false;
-        roleIndex = (roleIndex + 1) % roles.length;
-      }
-    }
-
-    if (!isPaused) {
-      const speed = isDeleting ? 60 : 100;
-      setTimeout(typeLoop, speed);
-    }
-  }
-
-  // Blinking cursor via CSS class
-  roleEl.style.borderRight = '2px solid #c084fc';
-  roleEl.style.paddingRight = '4px';
-  roleEl.style.animation = 'blink 1s step-end infinite';
-
-  setTimeout(typeLoop, 1000);
-}
-
-/* ==========================================
-   6. HERO PARTICLES
-   ========================================== */
-function initParticles() {
-  const container = document.getElementById('particles');
-  if (!container) return;
-
-  const count = window.innerWidth > 768 ? 55 : 25;
-
-  for (let i = 0; i < count; i++) {
-    createParticle(container);
-  }
-}
-
-function createParticle(container) {
-  const particle = document.createElement('div');
-  const size = Math.random() * 3 + 1;
-  const x = Math.random() * 100;
-  const y = Math.random() * 100;
-  const duration = Math.random() * 20 + 15;
-  const delay = Math.random() * 10;
-  const opacity = Math.random() * 0.5 + 0.1;
-
-  particle.style.cssText = `
-    position: absolute;
-    left: ${x}%;
-    top: ${y}%;
-    width: ${size}px;
-    height: ${size}px;
-    border-radius: 50%;
-    background: ${Math.random() > 0.5 ? '#7c3aed' : '#a855f7'};
-    opacity: ${opacity};
-    animation: particleFloat ${duration}s ${delay}s ease-in-out infinite;
-    pointer-events: none;
-  `;
-
-  container.appendChild(particle);
-}
-
-// Inject particle keyframes
-const particleStyle = document.createElement('style');
-particleStyle.textContent = `
-  @keyframes particleFloat {
-    0%, 100% { transform: translateY(0) scale(1); opacity: var(--op, 0.3); }
-    33%  { transform: translateY(-40px) translateX(20px) scale(1.2); }
-    66%  { transform: translateY(-20px) translateX(-15px) scale(0.8); }
-  }
-`;
-document.head.appendChild(particleStyle);
-
-/* ==========================================
-   7. SCROLL-TRIGGERED ANIMATIONS (AOS-like)
-   ========================================== */
-function initScrollAnimations() {
-  const elements = document.querySelectorAll('[data-aos]');
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('aos-animated');
-        // Once triggered, no need to observe again
-        observer.unobserve(entry.target);
-      }
-    });
-  }, {
-    threshold: 0.1,
-    rootMargin: '0px 0px -60px 0px',
-  });
-
-  elements.forEach(el => observer.observe(el));
-}
-
-/* ==========================================
-   8. SKILL BARS ANIMATION
-   ========================================== */
-function initSkillBars() {
-  const bars = document.querySelectorAll('.skill-bar-fill');
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const bar = entry.target;
-        const width = bar.dataset.width;
-        setTimeout(() => {
-          bar.style.width = width + '%';
-        }, 200);
-        observer.unobserve(bar);
-      }
-    });
-  }, { threshold: 0.3 });
-
-  bars.forEach(bar => observer.observe(bar));
-}
-
-/* ==========================================
-   9. CONTACT FORM
-   ========================================== */
-function initContactForm() {
-  const form = document.getElementById('contactForm');
-  const successMsg = document.getElementById('formSuccess');
-  const submitBtn = document.getElementById('submitBtn');
-  if (!form) return;
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const name    = document.getElementById('nameInput')?.value.trim();
-    const email   = document.getElementById('emailInput')?.value.trim();
-    const message = document.getElementById('messageInput')?.value.trim();
-
-    if (!name || !email || !message) {
-      shakeForm(form);
-      return;
-    }
-
-    // Loading state
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Sending...</span>';
-
-    // Simulate async send (replace with actual API call)
-    setTimeout(() => {
-      submitBtn.innerHTML = '<span>Send Message</span><i class="fas fa-paper-plane"></i>';
-      submitBtn.disabled = false;
-
-      form.reset();
-
-      // Show success
-      if (successMsg) {
-        successMsg.classList.add('show');
-        setTimeout(() => successMsg.classList.remove('show'), 5000);
-      }
-    }, 1800);
-  });
-
-  // Real-time input animations
-  form.querySelectorAll('input, textarea').forEach(input => {
-    input.addEventListener('focus', () => {
-      input.parentElement.style.transform = 'scale(1.01)';
-    });
-    input.addEventListener('blur', () => {
-      input.parentElement.style.transform = '';
-    });
-  });
-}
-
-function shakeForm(form) {
-  form.style.animation = 'shake 0.5s ease';
-  setTimeout(() => form.style.animation = '', 500);
-}
-
-// Inject shake keyframe
-const shakeStyle = document.createElement('style');
-shakeStyle.textContent = `
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    20% { transform: translateX(-8px); }
-    40% { transform: translateX(8px); }
-    60% { transform: translateX(-6px); }
-    80% { transform: translateX(6px); }
-  }
-`;
-document.head.appendChild(shakeStyle);
-
-/* ==========================================
-   10. BACK TO TOP BUTTON
-   ========================================== */
-function initBackToTop() {
-  const btn = document.getElementById('backTop');
-  if (!btn) return;
-
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 400) {
-      btn.classList.add('visible');
-    } else {
-      btn.classList.remove('visible');
-    }
-  }, { passive: true });
-
-  btn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-
-/* ==========================================
-   11. FOOTER YEAR
-   ========================================== */
-function initFooterYear() {
-  const yearEl = document.getElementById('footerYear');
-  if (yearEl) yearEl.textContent = new Date().getFullYear();
-}
-
-/* ==========================================
-   12. SMOOTH SCROLL (enhanced)
-   ========================================== */
-function initSmoothScroll() {
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      const target = document.querySelector(this.getAttribute('href'));
-      if (!target) return;
-      e.preventDefault();
-
-      const navHeight = document.getElementById('navbar')?.offsetHeight || 80;
-      const targetTop = target.getBoundingClientRect().top + window.scrollY - navHeight;
-
-      window.scrollTo({ top: targetTop, behavior: 'smooth' });
-    });
-  });
-}
-
-/* ==========================================
-   13. HERO PARALLAX on Mouse Move
-   ========================================== */
-function initHeroParallax() {
-  const hero = document.querySelector('.hero');
-  const blobs = document.querySelectorAll('.blob');
-  const photoFrame = document.querySelector('.photo-frame');
-
-  if (!hero) return;
-
-  hero.addEventListener('mousemove', (e) => {
-    const rect = hero.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width  - 0.5;
-    const y = (e.clientY - rect.top)  / rect.height - 0.5;
-
-    blobs.forEach((blob, i) => {
-      const factor = (i + 1) * 20;
-      blob.style.transform = `translate(${x * factor}px, ${y * factor}px)`;
-    });
-
-    if (photoFrame) {
-      photoFrame.style.transform = `perspective(1000px) rotateY(${x * 6}deg) rotateX(${-y * 4}deg)`;
-    }
-  });
-
-  hero.addEventListener('mouseleave', () => {
-    blobs.forEach(blob => {
-      blob.style.transform = '';
-    });
-    if (photoFrame) {
-      photoFrame.style.transform = '';
-    }
-  });
-}
-
-/* ==========================================
-   14. CARD TILT EFFECT on Skills/Edu/Contact
-   ========================================== */
-document.querySelectorAll('.edu-card, .skills-block, .timeline-card').forEach(card => {
-  card.addEventListener('mousemove', (e) => {
-    const rect = card.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width  - 0.5;
-    const y = (e.clientY - rect.top)  / rect.height - 0.5;
-
-    card.style.transform = `perspective(800px) rotateX(${-y * 4}deg) rotateY(${x * 4}deg) translateY(-6px)`;
-  });
-
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = '';
-    card.style.transition = 'transform 0.5s ease';
-  });
-
-  card.addEventListener('mouseenter', () => {
-    card.style.transition = 'transform 0.1s ease';
-  });
 });
-
-/* ==========================================
-   15. NUMBER COUNTER ANIMATION (Stats)
-   ========================================== */
-function animateCounter(el, target, suffix = '') {
-  let current = 0;
-  const step = Math.ceil(target / 60);
-  const timer = setInterval(() => {
-    current = Math.min(current + step, target);
-    el.textContent = current + suffix;
-    if (current >= target) clearInterval(timer);
-  }, 25);
-}
-
-function initCounters() {
-  const stats = document.querySelectorAll('.stat-number');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const el = entry.target;
-        const text = el.textContent;
-        const match = text.match(/(\d+\.?\d*)([K+]*)/);
-        if (match) {
-          let value = parseFloat(match[1]);
-          const suf = match[2] || '';
-
-          if (suf.includes('K')) {
-            // For "1.5K" etc., animate raw then format
-            let raw = value * 10;
-            let count = 0;
-            const t = setInterval(() => {
-              count = Math.min(count + 1, raw);
-              el.textContent = (count / 10).toFixed(count % 10 === 0 ? 0 : 1) + 'K';
-              if (count >= raw) clearInterval(t);
-            }, 30);
-          } else {
-            animateCounter(el, Math.round(value), suf);
-          }
-        }
-        observer.unobserve(el);
-      }
-    });
-  }, { threshold: 0.5 });
-
-  stats.forEach(el => observer.observe(el));
-}
-initCounters();
-
-/* ==========================================
-   16. NAVBAR HIDE ON DOWN / SHOW ON UP
-       (Optional UX enhancement)
-   ========================================== */
-let lastScrollY = 0;
-let scrollTimeout;
-window.addEventListener('scroll', () => {
-  const navbar = document.getElementById('navbar');
-  if (!navbar) return;
-
-  clearTimeout(scrollTimeout);
-  const currentScrollY = window.scrollY;
-
-  // Only hide if scrolled past 200px and going down
-  if (currentScrollY > 200 && currentScrollY > lastScrollY + 5) {
-    navbar.style.transform = 'translateY(-100%)';
-  } else if (currentScrollY < lastScrollY - 5) {
-    navbar.style.transform = 'translateY(0)';
-  }
-
-  navbar.style.transition = 'transform 0.4s cubic-bezier(0.4,0,0.2,1), background 0.4s, padding 0.4s, box-shadow 0.4s';
-  lastScrollY = currentScrollY;
-
-  // Always show when near top
-  if (currentScrollY < 100) {
-    navbar.style.transform = 'translateY(0)';
-  }
-}, { passive: true });
-
-/* ==========================================
-   17. SECTION REVEAL INDICATOR
-       Glowing line on section entry
-   ========================================== */
-function addSectionGlowLines() {
-  document.querySelectorAll('.section').forEach(section => {
-    const line = document.createElement('div');
-    line.style.cssText = `
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 3px;
-      background: linear-gradient(90deg, #7c3aed, #a855f7);
-      border-radius: 3px;
-      box-shadow: 0 0 12px rgba(124,58,237,0.6);
-    `;
-    section.style.position = 'relative';
-    section.prepend(line);
-  });
-}
-addSectionGlowLines();
-
-/* ==========================================
-   18. RIPPLE EFFECT on Buttons
-   ========================================== */
-document.querySelectorAll('.btn-primary, .btn-ghost, .social-btn, .social-link').forEach(btn => {
-  btn.addEventListener('click', function (e) {
-    const rect = this.getBoundingClientRect();
-    const ripple = document.createElement('span');
-    const size   = Math.max(rect.width, rect.height);
-    const x = e.clientX - rect.left - size / 2;
-    const y = e.clientY - rect.top  - size / 2;
-
-    ripple.style.cssText = `
-      position: absolute;
-      width: ${size}px;
-      height: ${size}px;
-      left: ${x}px;
-      top: ${y}px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.2);
-      transform: scale(0);
-      animation: rippleEffect 0.6s ease-out;
-      pointer-events: none;
-    `;
-
-    this.style.position = 'relative';
-    this.style.overflow = 'hidden';
-    this.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 600);
-  });
-});
-
-// Ripple keyframe
-const rippleStyle = document.createElement('style');
-rippleStyle.textContent = `
-  @keyframes rippleEffect {
-    to { transform: scale(4); opacity: 0; }
-  }
-`;
-document.head.appendChild(rippleStyle);
-
-/* ==========================================
-   19. HOBBY CARD EXTRA ANIMATION
-   ========================================== */
-document.querySelectorAll('.hobby-card').forEach((card, i) => {
-  card.style.animationDelay = `${i * 0.15}s`;
-  card.addEventListener('mouseenter', () => {
-    const icon = card.querySelector('.hobby-icon');
-    if (icon) {
-      icon.style.transform = 'scale(1.2) rotate(10deg)';
-      icon.style.transition = 'transform 0.4s cubic-bezier(0.34,1.56,0.64,1)';
-    }
-  });
-  card.addEventListener('mouseleave', () => {
-    const icon = card.querySelector('.hobby-icon');
-    if (icon) {
-      icon.style.transform = '';
-    }
-  });
-});
-
-/* ==========================================
-   20. ACTIVE SECTION PROGRESS INDICATOR
-       (thin bar at top of viewport)
-   ========================================== */
-function initScrollProgress() {
-  const bar = document.createElement('div');
-  bar.style.cssText = `
-    position: fixed;
-    top: 0; left: 0;
-    height: 3px;
-    width: 0%;
-    background: linear-gradient(90deg, #7c3aed, #a855f7, #c084fc);
-    z-index: 9998;
-    transition: width 0.1s ease;
-    box-shadow: 0 0 10px rgba(168,85,247,0.6);
-  `;
-  document.body.appendChild(bar);
-
-  window.addEventListener('scroll', () => {
-    const scrollTop    = window.scrollY;
-    const docHeight    = document.documentElement.scrollHeight - window.innerHeight;
-    const progress     = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-    bar.style.width    = progress + '%';
-  }, { passive: true });
-}
-initScrollProgress();
-
-console.log('%c✨ Portfolio loaded! Customize your data in index.html', 'color:#a855f7; font-weight:bold; font-size:14px;');

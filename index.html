@@ -1,727 +1,571 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fairus Priyogi Portfolio</title>
-  <meta name="description" content="Personal portfolio of [Your Name] — Web Developer, Designer & Creative Professional." />
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
-  <!-- Devicons for tech logos -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css" />
-
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PENCATATAN UANG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold:        #10eddbc5;
+  --gold-light:  #327d88;
+  --gold-dim:    rgba(38, 170, 241, 0.15);
+  --gold-glow:   rgba(35, 210, 245, 0.35);
+  --bg:          #080C14;
+  --surface:     #0F1523;
+  --surface-2:   #161E30;
+  --surface-3:   #1C2640;
+  --border:      rgba(255,255,255,.07);
+  --border-gold: rgba(35, 193, 245, 0.3);
+  --text:        #aaedd7;
+  --text-muted:  #6B7A99;
+  --text-dim:    #3A4560;
+  --radius:      16px;
+  --radius-sm:   10px;
+  --shadow:      0 8px 32px rgba(26, 214, 247, 0.5);
+  --transition:  .25s cubic-bezier(.4,0,.2,1);
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 99px; }
+.bg-orb { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
+.bg-orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(35, 231, 245, 0.08) 0%, transparent 70%); top: -200px; right: -200px; }
+.bg-orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(59,130,246,.06) 0%, transparent 70%); bottom: -100px; left: -150px; }
+.app { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 20px 100px; }
+.header { display: flex; align-items: center; justify-content: space-between; padding: 28px 0 20px; }
+.header-brand { display: flex; flex-direction: column; }
+.header-brand .label { font-size: 11px; font-weight: 600; letter-spacing: .15em; color: var(--gold); text-transform: uppercase; }
+.header-brand h1 { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text); line-height: 1.1; }
+.header-date { font-size: 13px; color: var(--text-muted); }
+.hero-card {
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #1A2440 0%, #0F1A30 60%, #0a2739 100%);
+  border: 1px solid var(--border-gold); border-radius: 24px;
+  padding: 32px 36px; margin-bottom: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5), inset 0 1px 0 #10eddbc5;
+}
+.hero-card::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 80% 0%, rgba(10, 45, 67, 0.704) 0%, transparent 60%); pointer-events:none; }
+.hero-card::after  { content:''; position:absolute; top:-60px; right:-60px; width:200px; height:200px; border-radius:50%; background:#18aa9e; pointer-events:none; }
+.hero-label { font-size:12px; font-weight:500; letter-spacing:.12em; color:var(--gold); text-transform:uppercase; margin-bottom:8px; }
+.hero-amount { font-family:'DM Serif Display',serif; font-size:clamp(36px,8vw,56px); color:var(--text); line-height:1; margin-bottom:6px; }
+.hero-amount span { color:var(--gold); font-style:italic; }
+.hero-sub { font-size:13px; color:var(--text-muted); }
+.hero-stats { display:flex; gap:24px; margin-top:24px; padding-top:20px; border-top:1px solid var(--border); }
+.hero-stat { display:flex; flex-direction:column; gap:4px; }
+.hero-stat-val { font-size:18px; font-weight:700; color:var(--text); }
+.hero-stat-lbl { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.08em; }
+.filter-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:20px; }
+.filter-tabs { display:flex; gap:8px; margin-bottom:16px; }
+.tab-btn { flex:1; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:transparent; color:var(--text-muted); font-family:'Outfit',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:var(--transition); }
+.tab-btn.active { background:var(--gold-dim); border-color:var(--gold); color:var(--gold); }
+.tab-btn:hover:not(.active) { background:var(--surface-2); color:var(--text); }
+.filter-row { display:flex; gap:10px; }
+.filter-input-wrap { flex:1; }
+.filter-input-wrap input { width:100%; padding:11px 16px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:'Outfit',sans-serif; font-size:14px; outline:none; transition:var(--transition); }
+.filter-input-wrap input:focus { border-color:var(--gold); background:var(--surface-3); }
+.filter-input-wrap input::placeholder { color:var(--text-muted); }
+.btn-filter { padding:11px 22px; background:var(--gold); color:#0B0F1A; border:none; border-radius:var(--radius-sm); font-family:'Outfit',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:var(--transition); white-space:nowrap; }
+.btn-filter:hover { background:var(--gold-light); transform:translateY(-1px); }
+.chart-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:20px; display:none; }
+.chart-card.visible { display:block; }
+.chart-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.chart-title { font-size:14px; font-weight:600; color:var(--text-muted); letter-spacing:.05em; text-transform:uppercase; }
+.chart-bars { display:flex; align-items:flex-end; gap:8px; height:100px; }
+.chart-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.chart-bar-outer { width:100%; flex:1; display:flex; align-items:flex-end; }
+.chart-bar { width:100%; border-radius:6px 6px 0 0; min-height:4px; transition:height .6s cubic-bezier(.4,0,.2,1); }
+.chart-bar-lbl { font-size:10px; color:var(--text-muted); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+.chart-bar-amt { font-size:10px; font-weight:600; color:var(--text); }
+.section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.section-title { font-size:14px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.1em; }
+.section-count { font-size:12px; padding:3px 10px; background:var(--surface-2); border-radius:99px; color:var(--text-muted); }
+.tx-list { display:flex; flex-direction:column; gap:8px; }
+.tx-item { display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px; cursor:pointer; transition:var(--transition); animation:slideIn .3s ease both; }
+@keyframes slideIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.tx-item:hover { background:var(--surface-2); border-color:rgba(255,255,255,.12); transform:translateX(2px); }
+.tx-badge { flex-shrink:0; width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.tx-info { flex:1; min-width:0; }
+.tx-category { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; margin-bottom:2px; }
+.tx-note { font-size:14px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tx-date { font-size:11px; color:var(--text-muted); margin-top:1px; }
+.tx-right { flex-shrink:0; text-align:right; }
+.tx-amount { font-size:15px; font-weight:700; color:#9fb7b7; }
+.tx-actions { display:flex; gap:6px; margin-top:4px; justify-content:flex-end; }
+.tx-btn { width:26px; height:26px; border-radius:7px; border:none; display:flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer; transition:var(--transition); opacity:0; }
+.tx-item:hover .tx-btn { opacity:1; }
+.tx-btn-edit { background:var(--surface-3); color:var(--gold); }
+.tx-btn-edit:hover { background:var(--gold-dim); }
+.tx-btn-del  { background:var(--surface-3); color:#ef7409; }
+.tx-btn-del:hover  { background:rgba(255,107,107,.15); }
+.empty-state { text-align:center; padding:60px 20px; display:none; }
+.empty-state.visible { display:block; }
+.empty-icon { font-size:48px; margin-bottom:16px; opacity:.4; }
+.empty-title { font-size:16px; font-weight:600; color:var(--text-muted); margin-bottom:6px; }
+.empty-sub { font-size:13px; color:var(--text-dim); }
+.fab { position:fixed; bottom:28px; right:28px; z-index:100; width:60px; height:60px; border-radius:18px; background:var(--gold); border:none; cursor:pointer; font-size:28px; color:#0B0F1A; box-shadow:0 8px 24px var(--gold-glow); transition:var(--transition); display:flex; align-items:center; justify-content:center; }
+.fab:hover { transform:translateY(-3px) rotate(90deg); box-shadow:0 12px 32px var(--gold-glow); }
+.overlay { position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.8); backdrop-filter:blur(6px); display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity .3s; }
+.overlay.open { opacity:1; pointer-events:all; }
+.modal { width:100%; max-width:520px; background:var(--surface); border:1px solid var(--border); border-radius:24px 24px 0 0; padding:0 0 env(safe-area-inset-bottom,20px); transform:translateY(100%); transition:transform .35s cubic-bezier(.4,0,.2,1); max-height:95vh; overflow-y:auto; }
+.overlay.open .modal { transform:translateY(0); }
+.modal-handle { width:40px; height:4px; background:var(--border); border-radius:99px; margin:14px auto 0; }
+.modal-header { padding:20px 24px 4px; display:flex; align-items:center; justify-content:space-between; }
+.modal-title { font-family:'DM Serif Display',serif; font-size:22px; color:var(--text); }
+.modal-close { width:34px; height:34px; border-radius:10px; border:none; background:var(--surface-2); color:var(--text-muted); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:var(--transition); }
+.modal-close:hover { background:var(--surface-3); color:var(--text); }
+.modal-body { padding:16px 24px 24px; display:flex; flex-direction:column; gap:16px; }
+.field { display:flex; flex-direction:column; gap:7px; }
+.field label { font-size:12px; font-weight:600; letter-spacing:.08em; color:var(--text-muted); text-transform:uppercase; }
+.field input, .field select, .field textarea { padding:13px 16px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:'Outfit',sans-serif; font-size:14px; outline:none; transition:var(--transition); width:100%; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color:var(--gold); background:var(--surface-3); box-shadow:0 0 0 3px var(--gold-dim); }
+.field input::placeholder, .field textarea::placeholder { color:var(--text-dim); }
+.field select option { background:var(--surface-2); }
+.field textarea { resize:none; min-height:80px; }
+.field .error-msg { font-size:11px; color:#FF6B6B; display:none; }
+.field.has-error input, .field.has-error select { border-color:#FF6B6B; }
+.field.has-error .error-msg { display:block; }
+.cat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.cat-btn { display:flex; flex-direction:column; align-items:center; gap:4px; padding:10px 6px; border-radius:12px; background:var(--surface-2); border:1.5px solid transparent; cursor:pointer; transition:var(--transition); }
+.cat-btn:hover { background:var(--surface-3); border-color:var(--border); }
+.cat-btn.selected { border-color:var(--gold); background:var(--gold-dim); }
+.cat-btn .cat-icon { font-size:20px; }
+.cat-btn .cat-name { font-size:10px; font-weight:500; color:var(--text-muted); }
+.cat-btn.selected .cat-name { color:var(--gold); }
+.btn-save { width:100%; padding:15px; background:var(--gold); color:#0B0F1A; border:none; border-radius:var(--radius-sm); font-family:'Outfit',sans-serif; font-size:15px; font-weight:700; cursor:pointer; transition:var(--transition); margin-top:4px; }
+.btn-save:hover { background:var(--gold-light); transform:translateY(-1px); }
+.confirm-overlay { position:fixed; inset:0; z-index:300; background:rgba(0,0,0,.85); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; pointer-events:none; transition:opacity .2s; }
+.confirm-overlay.open { opacity:1; pointer-events:all; }
+.confirm-box { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:28px 24px; max-width:340px; width:100%; text-align:center; transform:scale(.9); transition:transform .2s; }
+.confirm-overlay.open .confirm-box { transform:scale(1); }
+.confirm-icon { font-size:40px; margin-bottom:12px; }
+.confirm-title { font-size:18px; font-weight:700; margin-bottom:8px; }
+.confirm-msg { font-size:13px; color:var(--text-muted); margin-bottom:24px; line-height:1.6; }
+.confirm-actions { display:flex; gap:10px; }
+.confirm-btn { flex:1; padding:12px; border:none; border-radius:var(--radius-sm); font-family:'Outfit',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:var(--transition); }
+.confirm-btn-cancel { background:var(--surface-2); color:var(--text-muted); }
+.confirm-btn-cancel:hover { background:var(--surface-3); }
+.confirm-btn-del { background:rgba(255,107,107,.15); color:#FF6B6B; border:1px solid rgba(255,107,107,.3); }
+.confirm-btn-del:hover { background:rgba(255,107,107,.25); }
+.toast-wrap { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); z-index:400; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
+.toast { padding:12px 20px; border-radius:12px; font-size:13px; font-weight:500; white-space:nowrap; box-shadow:var(--shadow); animation:toastIn .3s ease, toastOut .3s ease 2.2s both; }
+.toast-success { background:#063A2A; border:1px solid #10B981; color:#34D399; }
+.toast-error   { background:#3A0606; border:1px solid #EF4444; color:#FCA5A5; }
+@keyframes toastIn  { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+@keyframes toastOut { from{opacity:1} to{opacity:0} }
+@media(min-width:640px) { .overlay{align-items:center} .modal{border-radius:24px;margin:20px} }
+@media(max-width:480px) { .hero-stats{gap:16px} .filter-tabs{gap:6px} .tab-btn{font-size:12px;padding:8px 6px} }
+</style>
 </head>
 <body>
 
-  <!-- ========== CURSOR ========== -->
-  <div class="cursor" id="cursor"></div>
-  <div class="cursor-follower" id="cursorFollower"></div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
 
-  <!-- ========== PRELOADER ========== -->
-  <div class="preloader" id="preloader">
-    <div class="preloader-inner">
-      <span class="preloader-text">FP</span>
-      <div class="preloader-bar"></div>
+<div class="app">
+  <header class="header">
+    <div class="header-brand">
+      <span class="label">📊 Pencatatan Uang</span>
+      <span class="label">IG:faiiruuzzzs</span>
+      <h1>Pengeluaran_FairusPriyogi</h1>
+    </div>
+    <span class="header-date" id="headerDate"></span>
+  </header>
+
+  <div class="hero-card">
+    <div class="hero-label">Total Pengeluaran</div>
+    <div class="hero-amount"><span>Rp</span>&nbsp;<span id="heroAmount">0</span></div>
+    <div class="hero-sub" id="heroSub">Pilih periode untuk melihat rekap</div>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-val" id="statCount">0</span><span class="hero-stat-lbl">Transaksi</span></div>
+      <div class="hero-stat"><span class="hero-stat-val" id="statAvg">Rp 0</span><span class="hero-stat-lbl">Rata-rata</span></div>
+      <div class="hero-stat"><span class="hero-stat-val" id="statTop">—</span><span class="hero-stat-lbl">Terbesar</span></div>
     </div>
   </div>
 
-  <!-- ========== NAVBAR ========== -->
-  <nav class="navbar" id="navbar">
-    <div class="nav-container">
-      <a href="#home" class="nav-logo">
-        <span class="logo-text">FP</span>
-        <span class="logo-dot"></span>
-      </a>
-      <ul class="nav-links" id="navLinks">
-        <li><a href="#home" class="nav-link active" data-section="home">Home</a></li>
-        <li><a href="#about" class="nav-link" data-section="about">About</a></li>
-        <li><a href="#experience" class="nav-link" data-section="experience">Experience</a></li>
-        <li><a href="#skills" class="nav-link" data-section="skills">Skills</a></li>
-        <li><a href="#education" class="nav-link" data-section="education">Education</a></li>
-        <li><a href="#contact" class="nav-link" data-section="contact">Contact</a></li>
-      </ul>
-      <a href="#contact" class="nav-btn">Hire Me</a>
-      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
-        <span></span><span></span><span></span>
-      </button>
+  <div class="filter-card">
+    <div class="filter-tabs">
+      <button class="tab-btn active" data-mode="daily"   onclick="setMode('daily')">Harian</button>
+      <button class="tab-btn"        data-mode="monthly" onclick="setMode('monthly')">Bulanan</button>
+      <button class="tab-btn"        data-mode="yearly"  onclick="setMode('yearly')">Tahunan</button>
     </div>
-  </nav>
-
-  <!-- ========== HERO SECTION ========== -->
-  <section class="hero" id="home">
-    <!-- Floating blobs -->
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-    <div class="particles" id="particles"></div>
-
-    <div class="hero-container">
-      <div class="hero-content">
-        <div class="hero-badge">
-          <span class="badge-dot"></span>
-          <span>Open to Work</span>
-        </div>
-        <h1 class="hero-title">
-          Hi, I'm <span class="highlight-name">FAIRUS PRIYOGI</span>
-        </h1>
-        <div class="hero-roles">
-          <span>I am a </span>
-          <div class="roles-wrapper">
-            <span class="role" id="roleText">Full Stack Developer</span>
-          </div>
-        </div>
-        <p class="hero-desc">
-          I build complex full-stack web solutions that are fast, scalable, and beautifully crafted. 
-          Let's create something amazing together.
-        </p>
-
-        <div class="hero-stats">
-          <div class="stat-item">
-            <span class="stat-number"></span>
-            <span class="stat-label"></span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-number"></span>
-            <span class="stat-label"></span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-number"></span>
-            <span class="stat-label"></span>
-          </div>
-        </div>
-
-        <div class="hero-actions">
-          <a href="#contact" class="btn-primary">
-            <span>Get In Touch</span>
-            <i class="fas fa-arrow-right"></i>
-          </a>
-          <a href="#experience" class="btn-ghost">
-            <i class="fas fa-play"></i>
-            <span>View Work</span>
-          </a>
-        </div>
-
-        <div class="hero-socials">
-          <a href="https://instagram.com/faiiruuzzzs" target="_blank" class="social-link" id="social-instagram" aria-label="Instagram">
-            <i class="fab fa-instagram"></i>
-          </a>
-          <a href="https://github.com/FairusPryg" target="_blank" class="social-link" id="social-github" aria-label="GitHub">
-            <i class="fab fa-github"></i>
-          </a>
-          <a href="https://linkedin.com/in/yourusername" target="_blank" class="social-link" id="social-linkedin" aria-label="LinkedIn">
-            <i class="fab fa-linkedin-in"></i>
-          </a>
-        </div>
+    <div class="filter-row">
+      <div class="filter-input-wrap">
+        <input type="text" id="filterInput" placeholder="YYYY-MM-DD" maxlength="10" />
       </div>
-
-      <div class="hero-visual">
-        <div class="photo-frame">
-          <div class="photo-glow"></div>
-          <div class="photo-ring ring-1"></div>
-          <div class="photo-ring ring-2"></div>
-          <div class="photo-container">
-            <!-- Replace src with your actual photo path -->
-            <img src="YOUR_PHOTO.jpg" alt="[Your Name]" class="hero-photo" id="heroPhoto" onerror="this.style.display='none'; document.getElementById('photoPlaceholder').style.display='flex';" />
-            <div class="photo-placeholder" id="photoPlaceholder">
-              <i class="fas fa-user"></i>
-              <span>Your Photo Here</span>
-            </div>
-          </div>
-          <!-- Floating badges around photo -->
-          <div class="float-badge badge-code">
-            <i class="fas fa-code"></i>
-            <span>Code</span>
-          </div>
-          <div class="float-badge badge-design">
-            <i class="fas fa-palette"></i>
-            <span>Design</span>
-          </div>
-          <div class="float-badge badge-ai">
-            <i class="fas fa-robot"></i>
-            <span>AI</span>
-          </div>
-        </div>
-      </div>
+      <button class="btn-filter" onclick="applyFilter()">Tampilkan</button>
     </div>
+  </div>
 
-    <a href="#about" class="scroll-indicator">
-      <div class="scroll-mouse">
-        <div class="scroll-wheel"></div>
-      </div>
-      <span>Scroll Down</span>
-    </a>
-  </section>
+  <div class="chart-card" id="chartCard">
+    <div class="chart-header"><span class="chart-title">Pengeluaran per Kategori</span></div>
+    <div class="chart-bars" id="chartBars"></div>
+  </div>
 
-  <!-- ========== ABOUT SECTION ========== -->
-  <section class="about section" id="about">
-    <div class="container">
-      <div class="section-header" data-aos="fade-up">
-        <span class="section-tag">Who I Am</span>
-        <h2 class="section-title">About <span class="gradient-text">Me</span></h2>
-        <p class="section-subtitle">A passionate creator who loves building digital experiences</p>
-      </div>
+  <div class="section-header">
+    <span class="section-title">Riwayat</span>
+    <span class="section-count" id="sectionCount">0 item</span>
+  </div>
+  <div class="tx-list" id="txList"></div>
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">💸</div>
+    <div class="empty-title">Tidak ada pengeluaran</div>
+    <div class="empty-sub">Tekan + untuk menambah pengeluaran baru</div>
+  </div>
+</div>
 
-      <div class="about-grid">
-        <div class="about-left" data-aos="fade-right">
-          <div class="about-photo-wrap">
-            <div class="about-photo-bg"></div>
-            <img src="YOUR_PHOTO.jpg" alt="About [Your Name]" class="about-photo" onerror="this.style.display='none'" />
-            <div class="about-photo-placeholder">
-              <i class="fas fa-user-tie"></i>
-            </div>
-            <div class="about-experience-card">
-              <span class="exp-number">3+</span>
-              <span class="exp-text">Years of<br>Experience</span>
-            </div>
-          </div>
-        </div>
+<button class="fab" onclick="openModal()" title="Tambah Pengeluaran">+</button>
 
-        <div class="about-right" data-aos="fade-left">
-          <h3 class="about-name">FAIRUS PRIYOGI</h3>
-          <p class="about-role">Full Stack Developer &amp; UI/UX Enthusiast</p>
-          <p class="about-bio">
-            Hey there! I’m a <strong>Full-Stack Developer</strong> who loves turning complex logic into seamless web experiences. Thanks to my <strong> DKV background</strong>, I don't just write solid backend code I also have a sharp eye for visual design. 
-            Whether it's architecting databases or crafting custom vector graphics in <strong> Adobe Illustrator and Photoshop </strong>, I've got it covered!
-          </p>
-          <p class="about-bio">
-            I'm currently based in <strong>Bogor, Indonesia</strong>. When I'm not coding,
-            you'll find me gaming, listening to music, or petting cats 🐱.
-          </p>
-
-          <!-- Hobbies & Interests -->
-          <div class="hobbies-section">
-            <h4 class="hobbies-title">Hobbies &amp; Interests</h4>
-            <div class="hobbies-grid">
-              <div class="hobby-card">
-                <div class="hobby-icon">
-                  <i class="fas fa-gamepad"></i>
-                </div>
-                <span>Gaming</span>
-              </div>
-              <div class="hobby-card">
-                <div class="hobby-icon paw-icon">
-                  <i class="fas fa-paw"></i>
-                </div>
-                <span>Cats</span>
-              </div>
-              <div class="hobby-card">
-                <div class="hobby-icon music-icon">
-                  <i class="fas fa-music"></i>
-                </div>
-                <span>Music</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="about-info-grid">
-            <div class="info-item">
-              <i class="fas fa-map-marker-alt"></i>
-              <span>Bogor, Indonesia</span>
-            </div>
-            <div class="info-item">
-              <i class="fas fa-envelope"></i>
-              <span>fairuspriyogi00@gmail.com</span>
-            </div>
-            <div class="info-item">
-              <i class="fas fa-calendar-alt"></i>
-              <span> 11-10-2007</span>
-            </div>
-            <div class="info-item">
-              <i class="fas fa-language"></i>
-              <span>Bahasa Indonesia, English</span>
-            </div>
-          </div>
-
-          <a href="#contact" class="btn-primary about-cta">
-            <span>Download CV</span>
-            <i class="fas fa-download"></i>
-          </a>
-        </div>
-      </div>
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Tambah Pengeluaran</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-  </section>
-
-  <!-- ========== EXPERIENCE SECTION ========== -->
-  <section class="experience section" id="experience">
-    <div class="container">
-      <div class="section-header" data-aos="fade-up">
-        <span class="section-tag">My Journey</span>
-        <h2 class="section-title">Work <span class="gradient-text">Experience</span></h2>
-        <p class="section-subtitle">Places I've worked and things I've built</p>
+    <div class="modal-body">
+      <div class="field" id="fieldDate">
+        <label>📅 Tanggal</label>
+        <input type="date" id="inputDate" />
+        <span class="error-msg">Tanggal wajib diisi</span>
       </div>
-
-      <div class="timeline-container">
-        <!-- Experience Item 1 -->
-        <div class="timeline-item" data-aos="fade-up" data-aos-delay="100">
-          <div class="timeline-dot">
-            <i class="fas fa-briefcase"></i>
-          </div>
-          <div class="timeline-card">
-            <div class="timeline-header">
-              <div>
-                <h3 class="timeline-role">Full Stack Developer</h3>
-                <p class="timeline-company">PT. GoTo Gojek Tokopedia tbk (GOTO)</p>
-              </div>
-              <span class="timeline-period">2032 – NOW</span>
-            </div>
-            <p class="timeline-desc">
-              Contributed to full-stack web development for high-traffic applications, building scalable backend architectures and seamless user-facing features. 
-              Collaborated with cross-functional teams to optimize system performance and deliver design-driven digital solutions on time.
-            </p>
-            <div class="timeline-tags">
-              <span class="tag">React</span>
-              <span class="tag">Node.js</span>
-              <span class="tag">MongoDB</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Experience Item 2 -->
-        <div class="timeline-item" data-aos="fade-up" data-aos-delay="200">
-          <div class="timeline-dot">
-            <i class="fas fa-laptop-code"></i>
-          </div>
-          <div class="timeline-card">
-            <div class="timeline-header">
-              <div>
-                <h3 class="timeline-role">UI/UX Designer &amp; Developer</h3>
-                <p class="timeline-company">Freelance / Remote</p>
-              </div>
-              <span class="timeline-period">2029 – 2032</span>
-            </div>
-            <p class="timeline-desc">
-              Designed and developed beautiful user interfaces for various clients. Created wireframes,
-              prototypes, and fully functional websites. Replace with your actual experience.
-            </p>
-            <div class="timeline-tags">
-              <span class="tag">Figma</span>
-              <span class="tag">JavaScript</span>
-              <span class="tag">CSS3</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Experience Item 3 -->
-        <div class="timeline-item" data-aos="fade-up" data-aos-delay="300">
-          <div class="timeline-dot">
-            <i class="fas fa-paint-brush"></i>
-          </div>
-          <div class="timeline-card">
-            <div class="timeline-header">
-              <div>
-                <h3 class="timeline-role">Junior Graphic Designer</h3>
-                <p class="timeline-company">Creative Studio XYZ</p>
-              </div>
-              <span class="timeline-period">2027 – 2029</span>
-            </div>
-            <p class="timeline-desc">
-              Created visual content including branding materials, social media graphics, and marketing
-              collateral. Developed strong eye for design and aesthetics.
-            </p>
-            <div class="timeline-tags">
-              <span class="tag">Photoshop</span>
-              <span class="tag">Illustrator</span>
-              <span class="tag">Branding</span>
-            </div>
-          </div>
-        </div>
+      <div class="field" id="fieldAmount">
+        <label>💰 Nominal (Rp)</label>
+        <input type="number" id="inputAmount" placeholder="cth: 50000" min="0" step="500" />
+        <span class="error-msg">Masukkan nominal yang valid (> 0)</span>
       </div>
+      <div class="field" id="fieldCategory">
+        <label>🏷️ Kategori</label>
+        <div class="cat-grid" id="catGrid"></div>
+        <span class="error-msg">Pilih kategori</span>
+      </div>
+      <div class="field">
+        <label>📝 Catatan (Opsional)</label>
+        <textarea id="inputNote" placeholder="Tulis keterangan singkat…" maxlength="200"></textarea>
+      </div>
+      <button class="btn-save" id="btnSave" onclick="saveExpense()">Simpan Pengeluaran</button>
     </div>
-  </section>
+  </div>
+</div>
 
-  <!-- ========== SKILLS SECTION ========== -->
-  <section class="skills section" id="skills">
-    <div class="container">
-      <div class="section-header" data-aos="fade-up">
-        <span class="section-tag">What I Know</span>
-        <h2 class="section-title">My <span class="gradient-text">Skills</span></h2>
-        <p class="section-subtitle">Technologies and tools I work with</p>
-      </div>
-
-      <div class="skills-wrapper">
-
-        <!-- Software Skills -->
-        <div class="skills-block" data-aos="fade-up" data-aos-delay="100">
-          <h3 class="skills-block-title">
-            <i class="fas fa-tools"></i>
-            Software Skills
-          </h3>
-          <div class="skills-icons-grid">
-            <div class="skill-icon-item">
-              <div class="skill-icon-box">
-                <i class="fas fa-robot"></i>
-              </div>
-              <span>AI Tools</span>
-            </div>
-            <div class="skill-icon-item">
-              <div class="skill-icon-box ps-box">
-                <i class="fas fa-image"></i>
-              </div>
-              <span>Photoshop</span>
-            </div>
-            <div class="skill-icon-item">
-              <div class="skill-icon-box figma-box">
-                <i class="fab fa-figma"></i>
-              </div>
-              <span>Figma</span>
-            </div>
-            <div class="skill-icon-item">
-              <div class="skill-icon-box xd-box">
-                <i class="fas fa-vector-square"></i>
-              </div>
-              <span>Adobe XD</span>
-            </div>
-            <div class="skill-icon-item">
-              <div class="skill-icon-box pr-box">
-                <i class="fas fa-film"></i>
-              </div>
-              <span>Premiere</span>
-            </div>
-            <div class="skill-icon-item">
-              <div class="skill-icon-box wp-box">
-                <i class="fab fa-wordpress"></i>
-              </div>
-              <span>WordPress</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Coding Skills -->
-        <div class="skills-block" data-aos="fade-up" data-aos-delay="200">
-          <h3 class="skills-block-title">
-            <i class="fas fa-code"></i>
-            Coding Skills
-          </h3>
-          <div class="skills-icons-grid">
-            <div class="skill-icon-item">
-              <div class="skill-icon-box js-box">
-                <i class="fab fa-js-square"></i>
-              </div>
-              <span>JavaScript</span>
-            </div>
-            <div class="skill-icon-item">
-              <div class="skill-icon-box cpp-box">
-                <i class="devicon-cplusplus-plain"></i>
-              </div>
-              <span>C++</span>
-            </div>
-            <div class="skill-icon-item">
-              <div class="skill-icon-box py-box">
-                <i class="fab fa-python"></i>
-              </div>
-              <span>Python</span>
-            </div>
-            <div class="skill-icon-item">
-              <div class="skill-icon-box html-box">
-                <i class="fab fa-html5"></i>
-              </div>
-              <span>HTML5</span>
-            </div>
-            <div class="skill-icon-item">
-              <div class="skill-icon-box css-box">
-                <i class="fab fa-css3-alt"></i>
-              </div>
-              <span>CSS</span>
-            </div>
-            <div class="skill-icon-item">
-              <div class="skill-icon-box react-box">
-                <i class="fab fa-react"></i>
-              </div>
-              <span>React</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Skill Bars -->
-        <div class="skills-block skills-bars-block" data-aos="fade-up" data-aos-delay="300">
-          <h3 class="skills-block-title">
-            <i class="fas fa-chart-bar"></i>
-            Proficiency
-          </h3>
-          <div class="skill-bars">
-            <div class="skill-bar-item">
-              <div class="skill-bar-header">
-                <span>JavaScript</span>
-                <span>85%</span>
-              </div>
-              <div class="skill-bar-track">
-                <div class="skill-bar-fill" data-width="85"></div>
-              </div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-bar-header">
-                <span>Python</span>
-                <span>78%</span>
-              </div>
-              <div class="skill-bar-track">
-                <div class="skill-bar-fill" data-width="78"></div>
-              </div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-bar-header">
-                <span>Photoshop</span>
-                <span>90%</span>
-              </div>
-              <div class="skill-bar-track">
-                <div class="skill-bar-fill" data-width="90"></div>
-              </div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-bar-header">
-                <span>C++</span>
-                <span>65%</span>
-              </div>
-              <div class="skill-bar-track">
-                <div class="skill-bar-fill" data-width="65"></div>
-              </div>
-            </div>
-            <div class="skill-bar-item">
-              <div class="skill-bar-header">
-                <span>UI/UX Design</span>
-                <span>80%</span>
-              </div>
-              <div class="skill-bar-track">
-                <div class="skill-bar-fill" data-width="80"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">Hapus Pengeluaran?</div>
+    <div class="confirm-msg">Tindakan ini tidak dapat dibatalkan. Data akan dihapus permanen.</div>
+    <div class="confirm-actions">
+      <button class="confirm-btn confirm-btn-cancel" onclick="closeConfirm()">Batal</button>
+      <button class="confirm-btn confirm-btn-del"    onclick="confirmDelete()">Hapus</button>
     </div>
-  </section>
+  </div>
+</div>
 
-  <!-- ========== EDUCATION SECTION ========== -->
-  <section class="education section" id="education">
-    <div class="container">
-      <div class="section-header" data-aos="fade-up">
-        <span class="section-tag">My Background</span>
-        <h2 class="section-title">Edu<span class="gradient-text">cation</span></h2>
-        <p class="section-subtitle">My academic journey and qualifications</p>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+'use strict';
+
+/* ─── CONSTANTS ─────────────────────────────────────────────────────── */
+const STORAGE_KEY = 'expense_tracker_v1';
+const CATEGORIES = [
+  { id:'makanan',    label:'Makanan',    icon:'🍜', color:'#FF6B35' },
+  { id:'transport',  label:'Transport',  icon:'🚌', color:'#3B82F6' },
+  { id:'belanja',    label:'Belanja',    icon:'🛒', color:'#A855F7' },
+  { id:'tagihan',    label:'Tagihan',    icon:'🧾', color:'#EF4444' },
+  { id:'hiburan',    label:'Hiburan',    icon:'🎮', color:'#10B981' },
+  { id:'kesehatan',  label:'Kesehatan',  icon:'💊', color:'#06B6D4' },
+  { id:'pendidikan', label:'Pendidikan', icon:'📚', color:'#F59E0B' },
+  { id:'lainnya',    label:'Lainnya',    icon:'📦', color:'#64748B' },
+];
+
+/* ─── STATE ──────────────────────────────────────────────────────────── */
+let expenses      = [];
+let currentMode   = 'daily';
+let currentFilter = '';
+let editId        = null;
+let deleteId      = null;
+let selectedCat   = '';
+let counterAnimId = null;
+
+/* ─── STORAGE ────────────────────────────────────────────────────────── */
+function loadData() {
+  try { expenses = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { expenses = []; }
+}
+function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses)); }
+function genId()    { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+/* ─── FORMAT ─────────────────────────────────────────────────────────── */
+const fmtRupiah = n => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+const fmtRupiahShort = n => {
+  if (n >= 1_000_000_000) return 'Rp' + (n / 1_000_000_000). toFixed(1) + 'm'
+  if (n >= 1_000_000) return 'Rp ' + (n / 1_000_000).toFixed(1) + 'jt';
+  if (n >= 1_000)     return 'Rp ' + (n / 1_000).toFixed(0) + 'rb';
+  return 'Rp ' + n;
+};
+
+/* ─── FILTER LOGIC ───────────────────────────────────────────────────── */
+function filterExpenses(mode, value) {
+  if (!value) return [];
+  return expenses.filter(e => {
+    if (mode === 'daily')   return e.date === value;
+    if (mode === 'monthly') return e.date.startsWith(value + '-');
+    if (mode === 'yearly')  return e.date.startsWith(value + '-');
+    return false;
+  });
+}
+
+/* ─── HEADER DATE ────────────────────────────────────────────────────── */
+function renderHeaderDate() {
+  document.getElementById('headerDate').textContent =
+    new Date().toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+}
+
+/* ─── MODE TABS ──────────────────────────────────────────────────────── */
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === mode));
+
+  const input = document.getElementById('filterInput');
+  const today = new Date();
+  const pad   = n => String(n).padStart(2,'0');
+  const yyyy  = today.getFullYear();
+  const mm    = pad(today.getMonth() + 1);
+  const dd    = pad(today.getDate());
+
+  if (mode === 'daily')   { input.placeholder='YYYY-MM-DD'; input.value=`${yyyy}-${mm}-${dd}`; input.maxLength=10; }
+  if (mode === 'monthly') { input.placeholder='YYYY-MM';    input.value=`${yyyy}-${mm}`;       input.maxLength=7;  }
+  if (mode === 'yearly')  { input.placeholder='YYYY';       input.value=`${yyyy}`;             input.maxLength=4;  }
+
+  applyFilter();
+}
+
+/* ─── APPLY FILTER ───────────────────────────────────────────────────── */
+function applyFilter() {
+  const raw = document.getElementById('filterInput').value.trim();
+  const patterns = { daily:/^\d{4}-\d{2}-\d{2}$/, monthly:/^\d{4}-\d{2}$/, yearly:/^\d{4}$/ };
+  if (!patterns[currentMode].test(raw)) {
+    showToast({ daily:'Format: YYYY-MM-DD', monthly:'Format: YYYY-MM', yearly:'Format: YYYY' }[currentMode], 'error');
+    return;
+  }
+  currentFilter = raw;
+  const filtered = filterExpenses(currentMode, raw);
+  renderHero(filtered, raw);
+  renderList(filtered);
+  renderChart(filtered);
+}
+
+/* ─── HERO ───────────────────────────────────────────────────────────── */
+function renderHero(list, label) {
+  const total = list.reduce((s, e) => s + e.amount, 0);
+  const count = list.length;
+  animateCounter(document.getElementById('heroAmount'), total);
+  document.getElementById('heroSub').textContent =
+    currentMode === 'daily'   ? `Pengeluaran Pada ${label}` :
+    currentMode === 'monthly' ? `Pengeluaran Pada ${label}`   :
+                                `Pengeluaran Pada ${label}`;
+  document.getElementById('statCount').textContent = count;
+  document.getElementById('statAvg').textContent   = count ? fmtRupiahShort(total / count) : 'Rp 0';
+  document.getElementById('statTop').textContent   = count ? fmtRupiahShort(Math.max(...list.map(e => e.amount))) : '—';
+}
+
+function animateCounter(el, target) {
+  if (counterAnimId) cancelAnimationFrame(counterAnimId);
+  const t0 = performance.now();
+  const tick = now => {
+    const p = Math.min((now - t0) / 600, 1);
+    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))).toLocaleString('id-ID');
+    if (p < 1) { counterAnimId = requestAnimationFrame(tick); } else { counterAnimId = null; }
+  };
+  counterAnimId = requestAnimationFrame(tick);
+}
+
+/* ─── CHART ──────────────────────────────────────────────────────────── */
+function renderChart(list) {
+  const card = document.getElementById('chartCard');
+  if (!list.length) { card.classList.remove('visible'); return; }
+  const totals = {};
+  list.forEach(e => { totals[e.category] = (totals[e.category] || 0) + e.amount; });
+  const entries = Object.entries(totals).sort((a,b) => b[1]-a[1]).slice(0,8);
+  if (!entries.length) { card.classList.remove('visible'); return; }
+  card.classList.add('visible');
+  const maxVal = Math.max(...entries.map(e => e[1]));
+  const wrap   = document.getElementById('chartBars');
+  wrap.innerHTML = '';
+  entries.forEach(([catId, amt]) => {
+    const cat = CATEGORIES.find(c => c.id === catId) || { label:catId, icon:'📦', color:'#64748B' };
+    const pct = maxVal > 0 ? (amt / maxVal) * 100 : 0;
+    const div = document.createElement('div');
+    div.className = 'chart-bar-wrap';
+    div.innerHTML = `
+      <span class="chart-bar-amt">${fmtRupiahShort(amt)}</span>
+      <div class="chart-bar-outer"><div class="chart-bar" style="height:${pct}%;background:${cat.color};"></div></div>
+      <span class="chart-bar-lbl">${cat.icon} ${cat.label}</span>`;
+    wrap.appendChild(div);
+  });
+}
+
+/* ─── LIST ───────────────────────────────────────────────────────────── */
+function renderList(list) {
+  const ul    = document.getElementById('txList');
+  const empty = document.getElementById('emptyState');
+  document.getElementById('sectionCount').textContent = `${list.length} item`;
+  if (!list.length) { ul.innerHTML = ''; empty.classList.add('visible'); return; }
+  empty.classList.remove('visible');
+  const sorted = [...list].sort((a,b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
+  ul.innerHTML = '';
+  sorted.forEach((e, i) => {
+    const cat = CATEGORIES.find(c => c.id === e.category) || { label:e.category, icon:'📦', color:'#64748B' };
+    const div = document.createElement('div');
+    div.className = 'tx-item';
+    div.style.animationDelay = `${i * 40}ms`;
+    div.innerHTML = `
+      <div class="tx-badge" style="background:${cat.color}22;"><span>${cat.icon}</span></div>
+      <div class="tx-info">
+        <div class="tx-category" style="color:${cat.color}">${cat.label}</div>
+        <div class="tx-note">${escHtml(e.note || 'Tidak ada catatan')}</div>
+        <div class="tx-date">${e.date}</div>
       </div>
-
-      <div class="edu-grid">
-        <!-- Edu Card 1 -->
-         <div class="edu-card" data-aos="fade-up" data-aos-delay="200">
-          <div class="edu-icon">
-            <i class="fas fa-school"></i>
-          </div>
-          <div class="edu-period">2022 – 2025</div>
-<<<<<<< HEAD
-          <h3 class="edu-school">SMKN 1 LEUWILIANGG</h3>
-=======
-          <h3 class="edu-school">SMKN 1 LEUWILIANG</h3>
->>>>>>> aad90fd5f39bc0642971119e598ab452736b0daf
-          <p class="edu-major">Desain Komunikasi Visual (DKV)</p>
-          <p class="edu-desc">A Visual Communication Design graduate from SMKN 1 LEUWILIANG, highly proficient in Adobe Illustrator and Photoshop for crafting custom digital assets from scratch. This background gives me a unique edge as a Full-Stack Developer, enabling me to seamlessly bridge robust backend logic with refined frontend aesthetics.</p>
-          <div class="edu-tag">SMA / SMK</div>
+      <div class="tx-right">
+        <div class="tx-amount">${fmtRupiah(e.amount)}</div>
+        <div class="tx-actions">
+          <button class="tx-btn tx-btn-edit" onclick="openEdit('${e.id}',event)" title="Edit">✏️</button>
+          <button class="tx-btn tx-btn-del"  onclick="openDelete('${e.id}',event)" title="Hapus">🗑️</button>
         </div>
+      </div>`;
+    ul.appendChild(div);
+  });
+}
 
-        <!-- Edu Card 2 -->
-         <div class="edu-card" data-aos="fade-up" data-aos-delay="100">
-          <div class="edu-icon">
-            <i class="fas fa-graduation-cap"></i>
-          </div>
-          <div class="edu-period">2025 – NOW</div>
-          <h3 class="edu-school">UNIVERSITAS PAMULANG</h3>
-          <p class="edu-major">TEKNIK INFORMATIKA</p>
-          <p class="edu-desc">Student Informatic Engineer.</p>
-          <div class="edu-tag">S1 / Diploma</div>
-        </div>
+/* ─── MODAL ──────────────────────────────────────────────────────────── */
+function buildCatGrid() {
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = '';
+  CATEGORIES.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn'; btn.dataset.id = c.id;
+    btn.innerHTML = `<span class="cat-icon">${c.icon}</span><span class="cat-name">${c.label}</span>`;
+    btn.onclick   = () => selectCat(c.id);
+    grid.appendChild(btn);
+  });
+}
 
-        <!-- Edu Card 3 -->
-        <div class="edu-card" data-aos="fade-up" data-aos-delay="300">
-          <div class="edu-icon">
-            <i class="fas fa-certificate"></i>
-          </div>
-          <div class="edu-period">Certification</div>
-          <h3 class="edu-school">BNSP</h3>
-          <p class="edu-major">Badan Nasional Sertifikat Profesi</p>
-          <p class="edu-desc">Cerification of BNSP and bootcamp IT</p>
-          <div class="edu-tag">Certification</div>
-        </div>
-      </div>
-    </div>
-  </section>
+function selectCat(id) {
+  selectedCat = id;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('selected', b.dataset.id === id));
+  document.getElementById('fieldCategory').classList.remove('has-error');
+}
 
-  <!-- ========== CONTACT SECTION ========== -->
-  <section class="contact section" id="contact">
-    <div class="container">
-      <div class="section-header" data-aos="fade-up">
-        <span class="section-tag">Get In Touch</span>
-        <h2 class="section-title">Let's <span class="gradient-text">Connect</span></h2>
-        <p class="section-subtitle">Have a project in mind? Let's talk about it.</p>
-      </div>
+function openModal() {
+  editId = null; selectedCat = '';
+  document.getElementById('modalTitle').textContent = 'Tambah Pengeluaran';
+  document.getElementById('btnSave').textContent    = 'Simpan Pengeluaran';
+  document.getElementById('inputDate').value        = todayISO();
+  document.getElementById('inputAmount').value      = '';
+  document.getElementById('inputNote').value        = '';
+  clearErrors(); buildCatGrid();
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
 
-      <div class="contact-wrapper">
-        <!-- Contact Info -->
-        <div class="contact-info" data-aos="fade-right">
-          <h3 class="contact-info-title">Contact Information</h3>
-          <p class="contact-info-desc">
-            Feel free to reach out through any of these channels.
-            I'll get back to you as soon as possible!
-          </p>
+function openEdit(id, e) {
+  e.stopPropagation();
+  const exp = expenses.find(x => x.id === id);
+  if (!exp) return;
+  editId = id; selectedCat = exp.category;
+  document.getElementById('modalTitle').textContent = 'Edit Pengeluaran';
+  document.getElementById('btnSave').textContent    = 'Simpan Perubahan';
+  document.getElementById('inputDate').value        = exp.date;
+  document.getElementById('inputAmount').value      = exp.amount;
+  document.getElementById('inputNote').value        = exp.note || '';
+  clearErrors(); buildCatGrid(); selectCat(exp.category);
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
 
-          <div class="contact-items">
-            <div class="contact-item">
-              <div class="contact-item-icon">
-                <i class="fas fa-phone"></i>
-              </div>
-              <div class="contact-item-info">
-                <span class="contact-item-label">WhatsApp / Phone</span>
-                <a href="https://wa.me/628XXXXXXXXXX" class="contact-item-value" id="contact-phone">+62 8XX-XXXX-XXXX</a>
-              </div>
-            </div>
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
 
-            <div class="contact-item">
-              <div class="contact-item-icon">
-                <i class="fas fa-envelope"></i>
-              </div>
-              <div class="contact-item-info">
-                <span class="contact-item-label">Email</span>
-                <a href="mailto:youremail@example.com" class="contact-item-value" id="contact-email">youremail@example.com</a>
-              </div>
-            </div>
+function overlayClick(e) {
+  if (e.target === document.getElementById('overlay')) closeModal();
+}
 
-            <div class="contact-item">
-              <div class="contact-item-icon">
-                <i class="fab fa-instagram"></i>
-              </div>
-              <div class="contact-item-info">
-                <span class="contact-item-label">Instagram</span>
-                <a href="https://instagram.com/faiiruuzzzs" target="_blank" class="contact-item-value" id="contact-instagram">instagram.com/faiiruuzzzs</a>
-              </div>
-            </div>
+/* ─── SAVE ───────────────────────────────────────────────────────────── */
+function saveExpense() {
+  const date   = document.getElementById('inputDate').value;
+  const amount = parseFloat(document.getElementById('inputAmount').value);
+  const note   = document.getElementById('inputNote').value.trim();
+  let valid    = true;
+  clearErrors();
+  if (!date)              { document.getElementById('fieldDate').classList.add('has-error');     valid = false; }
+  if (!amount || amount <= 0) { document.getElementById('fieldAmount').classList.add('has-error'); valid = false; }
+  if (!selectedCat)       { document.getElementById('fieldCategory').classList.add('has-error'); valid = false; }
+  if (!valid) return;
 
-            <div class="contact-item">
-              <div class="contact-item-icon">
-                <i class="fab fa-github"></i>
-              </div>
-              <div class="contact-item-info">
-                <span class="contact-item-label">GitHub</span>
-                <a href="https://github.com/FairusPryg" target="_blank" class="contact-item-value" id="contact-github">github.com/FairusPryg</a>
-              </div>
-            </div>
+  if (editId) {
+    const idx = expenses.findIndex(e => e.id === editId);
+    if (idx > -1) {
+      expenses[idx] = { ...expenses[idx], date, amount, category:selectedCat, note, updatedAt:Date.now() };
+      showToast('Pengeluaran diperbarui ✓', 'success');
+    }
+  } else {
+    expenses.unshift({ id:genId(), date, amount, category:selectedCat, note, createdAt:Date.now() });
+    showToast('Pengeluaran disimpan ✓', 'success');
+  }
+  saveData(); closeModal();
+  if (currentFilter) applyFilter();
+}
 
-            <div class="contact-item">
-              <div class="contact-item-icon">
-                <i class="fab fa-linkedin-in"></i>
-              </div>
-              <div class="contact-item-info">
-                <span class="contact-item-label">LinkedIn</span>
-                <a href="https://linkedin.com/in/yourusername" target="_blank" class="contact-item-value" id="contact-linkedin">linkedin.com/in/yourusername</a>
-              </div>
-            </div>
+/* ─── DELETE ─────────────────────────────────────────────────────────── */
+function openDelete(id, e) {
+  e.stopPropagation();
+  deleteId = id;
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm() {
+  deleteId = null;
+  document.getElementById('confirmOverlay').classList.remove('open');
+}
+function confirmDelete() {
+  expenses = expenses.filter(e => e.id !== deleteId);
+  saveData(); closeConfirm();
+  showToast('Pengeluaran dihapus', 'success');
+  if (currentFilter) applyFilter();
+}
 
-            <div class="contact-item">
-              <div class="contact-item-icon">
-                <i class="fab fa-twitter"></i>
-              </div>
-              <div class="contact-item-info">
-                <span class="contact-item-label">Twitter / X</span>
-                <a href="https://twitter.com/yourusername" target="_blank" class="contact-item-value" id="contact-twitter">@yourusername</a>
-              </div>
-            </div>
-          </div>
+/* ─── HELPERS ────────────────────────────────────────────────────────── */
+function clearErrors() {
+  ['fieldDate','fieldAmount','fieldCategory'].forEach(id =>
+    document.getElementById(id).classList.remove('has-error'));
+}
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function showToast(msg, type = 'success') {
+  const wrap = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`; t.textContent = msg;
+  wrap.appendChild(t); setTimeout(() => t.remove(), 2700);
+}
 
-          <div class="contact-socials">
-            <a href="https://instagram.com/faiiruuzzzs" target="_blank" class="social-btn" id="social-ig-footer" aria-label="Instagram">
-              <i class="fab fa-instagram"></i>
-            </a>
-            <a href="https://github.com/FairusPryg" target="_blank" class="social-btn" id="social-gh-footer" aria-label="GitHub">
-              <i class="fab fa-github"></i>
-            </a>
-            <a href="https://linkedin.com/in/yourusername" target="_blank" class="social-btn" id="social-li-footer" aria-label="LinkedIn">
-              <i class="fab fa-linkedin-in"></i>
-            </a>
-            <a href="https://wa.me/628XXXXXXXXXX" target="_blank" class="social-btn" id="social-wa-footer" aria-label="WhatsApp">
-              <i class="fab fa-whatsapp"></i>
-            </a>
-          </div>
-        </div>
+/* ─── KEYBOARD ───────────────────────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeConfirm(); }
+  if (e.key === 'Enter' && document.activeElement === document.getElementById('filterInput')) applyFilter();
+});
 
-        <!-- Contact Form -->
-        <div class="contact-form-wrapper" data-aos="fade-left">
-          <form class="contact-form" id="contactForm">
-            <div class="form-group">
-              <label for="nameInput">Fairus Priyogi</label>
-              <div class="input-wrapper">
-                <i class="fas fa-user"></i>
-                <input type="text" id="nameInput" placeholder="John Doe" required />
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="emailInput">fairuspriyogi00@gmail.com</label>
-              <div class="input-wrapper">
-                <i class="fas fa-envelope"></i>
-                <input type="email" id="emailInput" placeholder="fairuspriyogi00.com" required />
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="subjectInput">Subject</label>
-              <div class="input-wrapper">
-                <i class="fas fa-tag"></i>
-                <input type="text" id="subjectInput" placeholder="Project Inquiry" />
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="messageInput">Message</label>
-              <div class="input-wrapper textarea-wrapper">
-                <i class="fas fa-comment"></i>
-                <textarea id="messageInput" rows="5" placeholder="Tell me about your project..." required></textarea>
-              </div>
-            </div>
-            <button type="submit" class="btn-primary form-submit" id="submitBtn">
-              <span>Send Message</span>
-              <i class="fas fa-paper-plane"></i>
-            </button>
-            <div class="form-success" id="formSuccess">
-              <i class="fas fa-check-circle"></i>
-              <span>Message sent! I'll get back to you soon.</span>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- ========== FOOTER ========== -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-brand">
-          <span class="logo-text">FP</span>
-          <span class="logo-dot"></span>
-        </div>
-        <p class="footer-copy">
-          &copy; <span id="footerYear"></span> <strong>FAIRUS PRIYOGI</strong>. All rights reserved.
-        </p>
-        <div class="footer-links">
-          <a href="#home">Home</a>
-          <a href="#about">About</a>
-          <a href="#skills">Skills</a>
-          <a href="#contact">Contact</a>
-        </div>
-      </div>
-    </div>
-    <div class="footer-line"></div>
-  </footer>
 
-  <!-- Back to top -->
-  <button class="back-top" id="backTop" aria-label="Back to top">
-    <i class="fas fa-chevron-up"></i>
-  </button>
-
-  <script src="main.js"></script>
+</script>
 </body>
 </html>
